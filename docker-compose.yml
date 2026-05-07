@@ -26,6 +26,8 @@ services:
         database:
           condition: service_healthy
       environment:
+        # APACHE
+        APACHE_DOCUMENT_ROOT: public
         # LARAVEL SPECIFICS
         APP_NAME: ${APP_NAME}
         APP_ENV: ${ENV}
