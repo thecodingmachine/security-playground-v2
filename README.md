@@ -1,6 +1,17 @@
 # SECURITY PLAYGROUND V2
 
-TODO TODO
+This project is a hands-on demo for OWASP training: it illustrates risks and good practices across the following Top 10 categories:
+
+- **A01** Broken Access Control
+- **A02** Security Misconfiguration
+- **A03** Software Supply Chain Failures
+- **A04** Cryptographic Failures
+- **A05** Injection
+- **A06** Insecure Design
+- **A07** Authentication Failures
+- **A08** Software or Data Integrity Failures
+- **A09** Security Logging and Alerting Failures
+- **A10** Mishandling of Exceptional Conditions
 
 ## Prerequisites
 
