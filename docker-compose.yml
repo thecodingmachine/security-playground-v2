@@ -92,7 +92,7 @@ services:
         # - ./owasp-06:/var/www/html
         # - ./owasp-07:/var/www/html
         # - ./owasp-09:/var/www/html
-        - ./certs:/certs:ro
+        - ./orchestrator/certs:/certs:ro
 
     database:
       image: ${HUB_PROXY}/mysql:8.4
@@ -147,6 +147,7 @@ services:
       labels:
         - traefik.enable=true
         - traefik.http.routers.mailing.rule=Host(`mailing.${DOMAIN}`)
+        - traefik.http.routers.mailing.tls=true
         - traefik.http.services.mailing.loadbalancer.server.port=8025
 
 volumes:
