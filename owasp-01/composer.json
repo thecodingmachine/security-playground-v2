@@ -1,15 +1,17 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "thecodingmachine/security-playground-v2",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "The Security Playground V2 application.",
     "keywords": [
         "laravel",
-        "framework"
+        "framework",
+        "owasp",
+        "security"
     ],
-    "license": "MIT",
+    "license": "private",
     "require": {
-        "php": "^8.3",
+        "php": "^8.5",
         "laravel/framework": "^13.7",
         "laravel/tinker": "^3.0"
     },

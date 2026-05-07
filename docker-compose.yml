@@ -16,8 +16,8 @@ services:
         - --entryPoints.web.http.redirections.entryPoint.to=websecure
         - --entryPoints.web.http.redirections.entryPoint.scheme=https
       volumes:
-        - orchestrator/config.yml:/etc/traefik/config.yml:ro
-        - orchestrator/certs:/etc/certs:ro
+        - ./orchestrator/config.yml:/etc/traefik/config.yml:ro
+        - ./orchestrator/certs:/etc/certs:ro
         - /var/run/docker.sock:/var/run/docker.sock:ro,delegated
 
     backend:
