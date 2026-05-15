@@ -12,14 +12,12 @@ back:
 
 # Clear the Laravel application cache and optimize the framework.
 clear-cache:
-	docker compose exec security-playground-v2-backend-1 php artisan optimize:clear
+	docker compose exec backend php artisan optimize:clear
 
 # Reset the database by running fresh migrations and seeding sample data.
 reset-db:
-	docker compose exec security-playground-v2-backend-1 php artisan db:wipe --database=mysql
-	docker compose exec security-playground-v2-backend-1 php artisan migrate
-	docker compose exec security-playground-v2-backend-1 php artisan db:seed
+	docker compose exec backend php artisan migrate:fresh --seed
 
 # Running composer lint
 lint:
-	docker compose exec security-playground-v2-backend-1 composer lint
+	docker compose exec backend composer lint
