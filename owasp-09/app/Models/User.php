@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'role', 'balance'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -18,8 +18,22 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
-     * Get the attributes that should be cast.
-     *
+     * @return HasMany<Transfer, $this>
+     */
+    public function sentTransfers(): HasMany
+    {
+        return $this->hasMany(Transfer::class, 'sender_id');
+    }
+
+    /**
+     * @return HasMany<Transfer, $this>
+     */
+    public function receivedTransfers(): HasMany
+    {
+        return $this->hasMany(Transfer::class, 'recipient_id');
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
@@ -27,6 +41,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'balance' => 'float',
         ];
     }
 }
