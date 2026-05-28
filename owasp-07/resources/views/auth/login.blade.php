@@ -54,6 +54,29 @@
             </button>
         </form>
     </div>
+
+    {{-- Comptes de test --}}
+    <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+        <p class="text-xs font-semibold text-amber-800 mb-2">Comptes de démonstration</p>
+        <div class="space-y-1.5 text-xs text-amber-700 font-mono">
+            <div class="flex items-center justify-between gap-2">
+                <span>maintenance@corp.local · <span class="font-semibold">admin</span></span>
+                <span class="px-1.5 py-0.5 bg-red-100 text-red-600 rounded text-[10px] font-sans font-medium">admin</span>
+            </div>
+            <div class="flex items-center justify-between gap-2">
+                <span>alice@corp.local · <span class="font-semibold">alice123</span></span>
+                <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-sans font-medium">user</span>
+            </div>
+            <div class="flex items-center justify-between gap-2">
+                <span>bob@corp.local · <span class="font-semibold">Tr0ub4dor&amp;3</span></span>
+                <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-sans font-medium">user</span>
+            </div>
+            <div class="flex items-center justify-between gap-2">
+                <span>admin@corp.local · <span class="font-semibold">K#9mP2$xL7vQ</span></span>
+                <span class="px-1.5 py-0.5 bg-red-100 text-red-600 rounded text-[10px] font-sans font-medium">admin</span>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- TODO: désactiver avant la livraison — /admin/api/employees -->

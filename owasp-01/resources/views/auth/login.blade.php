@@ -79,10 +79,19 @@
         {{-- Comptes de test --}}
         <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
             <p class="text-xs font-semibold text-amber-800 mb-2">Comptes de démonstration</p>
-            <div class="space-y-1 text-xs text-amber-700 font-mono">
-                <p>alice@example.com · <span class="font-semibold">password</span></p>
-                <p>bob@example.com · <span class="font-semibold">password</span></p>
-                <p>admin@example.com · <span class="font-semibold">password</span></p>
+            <div class="space-y-1.5 text-xs text-amber-700 font-mono">
+                <div class="flex items-center justify-between gap-2">
+                    <span>alice@example.com · <span class="font-semibold">password</span></span>
+                    <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-sans font-medium">user</span>
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                    <span>bob@example.com · <span class="font-semibold">password</span></span>
+                    <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-sans font-medium">user</span>
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                    <span>admin@example.com · <span class="font-semibold">password</span></span>
+                    <span class="px-1.5 py-0.5 bg-red-100 text-red-600 rounded text-[10px] font-sans font-medium">admin</span>
+                </div>
             </div>
         </div>
     </div>
