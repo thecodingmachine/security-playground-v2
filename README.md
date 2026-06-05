@@ -46,31 +46,23 @@ mkcert -cert-file local-cert.pem -key-file local-key.pem "owasp.localhost" "*.ow
 
 Two files should be generated: `local-cert.pem` and `local-key.pem`. And then you're good to go as far as HTTPS is concerned.
 
-#### 4. Once you've made sure all environment variables are properly set, you can start the project and access its services with the URLs given above.
+#### 4. Start the OWASP module you want
+
+Each module lives in its own folder (`owasp-01`, `owasp-06`, `owasp-07`, `owasp-09`). To start one, run the matching Make target:
 
 ```shell
-docker compose up -d
+make owasp-01   # A01 - Broken Access Control
+make owasp-06   # A06 - Insecure Design
+make owasp-07   # A07 - Authentication Failures
+make owasp-09   # A09 - Security Logging and Alerting Failures
 ```
 
-#### 5. Make sure all dependencies are installed, all migrations are run & seed the database (backend container)
+This command stops the stack, mounts the right application and database volume, starts the containers, installs PHP dependencies, and resets the database with seed data.
+
+Other useful commands:
 
 ```shell
-make back
-composer install
-php artisan migrate:fresh --seed
-exit
-```
-
-## Available commands
-
-If you wish to reset your database with test data, you can use this command:
-
-```bash
-make reset-db
-```
-
-If you want to clear the cache:
-
-```bash
-make clear-cache
+make reset-db      # reset the database of the active module
+make clear-cache   # clear the Laravel cache
+make back          # open a shell in the backend container
 ```
