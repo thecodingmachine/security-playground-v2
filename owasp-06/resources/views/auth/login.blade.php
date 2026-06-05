@@ -49,6 +49,25 @@
             </button>
         </form>
     </div>
+
+    {{-- Comptes de démonstration --}}
+    <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+        <p class="text-xs font-semibold text-amber-800 mb-2">Comptes de démonstration</p>
+        <div class="space-y-1.5 text-xs text-amber-700 font-mono">
+            <div class="flex items-center justify-between gap-2">
+                <span>alice@expensecorp.local · <span class="font-semibold">alice123</span></span>
+                <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-sans font-medium">employée</span>
+            </div>
+            <div class="flex items-center justify-between gap-2">
+                <span>bob@expensecorp.local · <span class="font-semibold">bob456</span></span>
+                <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-sans font-medium">employé</span>
+            </div>
+            <div class="flex items-center justify-between gap-2">
+                <span>admin@expensecorp.local · <span class="font-semibold">rh-admin2024</span></span>
+                <span class="px-1.5 py-0.5 bg-red-100 text-red-600 rounded text-[10px] font-sans font-medium">admin RH</span>
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 </html>

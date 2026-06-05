@@ -69,7 +69,7 @@
                     Révéler l'indice
                 </summary>
                 <div class="px-4 py-3 bg-amber-50 border-t border-amber-200 space-y-1.5">
-                    <p class="text-sm text-amber-800">• Quel composant fournit le type MIME lors d'un upload — le serveur ou le navigateur ? Peut-on le falsifier avec un outil comme Burp Suite ou curl ?</p>
+                    <p class="text-sm text-amber-800">• Quel composant fournit le type MIME lors d'un upload : le serveur ou le navigateur ? Peut-on le falsifier avec un outil comme Burp Suite ou curl ?</p>
                     <p class="text-sm text-amber-800">• Le nom du fichier est-il transformé (UUID, hash) avant d'être enregistré sur le disque, ou est-il conservé tel quel ?</p>
                     <p class="text-sm text-amber-800">• Regardez l'URL du lien "Ouvrir" après l'upload : dans quel répertoire le fichier est-il stocké ? Ce répertoire est-il accessible publiquement ?</p>
                 </div>
