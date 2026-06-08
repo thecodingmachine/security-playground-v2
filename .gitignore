@@ -1,0 +1,7 @@
+/.idea
+.env
+.DS_Store
+*.orig
+orchestrator/certs/local-cert.pem
+orchestrator/certs/local-key.pem
+.claude/plan.md

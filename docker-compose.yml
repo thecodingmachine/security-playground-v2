@@ -1,0 +1,157 @@
+services:
+    orchestrator:
+      image: ${HUB_PROXY}/traefik:v3.6
+      ports:
+        - 80:80
+        - 443:443
+        - 8080:8080
+      command:
+        - --global.sendAnonymousUsage=false
+        - --providers.docker
+        - --providers.docker.exposedbydefault=false
+        - --providers.file.filename=/etc/traefik/config.yml
+        - --api.insecure=true
+        - --entryPoints.web.address=:80
+        - --entryPoints.websecure.address=:443
+        - --entryPoints.web.http.redirections.entryPoint.to=websecure
+        - --entryPoints.web.http.redirections.entryPoint.scheme=https
+      volumes:
+        - ./orchestrator/config.yml:/etc/traefik/config.yml:ro
+        - ./orchestrator/certs:/etc/certs:ro
+        - /var/run/docker.sock:/var/run/docker.sock:ro,delegated
+
+    backend:
+      image: ${HUB_PROXY}/thecodingmachine/php:8.5-v5-apache-node24
+      depends_on:
+        database:
+          condition: service_healthy
+      environment:
+        # APACHE
+        APACHE_DOCUMENT_ROOT: public
+        # LARAVEL SPECIFICS
+        APP_NAME: ${APP_NAME}
+        APP_ENV: ${ENV}
+        APP_DEBUG: ${DEBUG}
+        APP_URL: ${HTTP_PROTOCOL}://${DOMAIN}
+        APP_KEY: ${APP_KEY}
+        APP_LOCALE: ${APP_LOCALE}
+        APP_FALLBACK_LOCALE: ${APP_FALLBACK_LOCALE}
+        APP_FAKER_LOCALE: ${APP_FAKER_LOCALE}
+        HTTP_PROTOCOL: ${HTTP_PROTOCOL}
+        # LOGGING
+        LOG_CHANNEL: ${LOG_CHANNEL}
+        LOG_STACK: ${LOG_STACK}
+        LOG_DEPRECATIONS_CHANNEL: ${LOG_DEPRECATIONS_CHANNEL}
+        LOG_LEVEL: ${LOG_LEVEL}
+        # SESSION
+        SESSION_DRIVER: ${SESSION_DRIVER}
+        SESSION_LIFETIME: ${SESSION_LIFETIME}
+        SESSION_ENCRYPT: ${SESSION_ENCRYPT}
+        SESSION_PATH: ${SESSION_PATH}
+        SESSION_DOMAIN: ${SESSION_DOMAIN}
+        SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE}
+        # FILESYSTEM
+        FILESYSTEM_DISK: ${FILESYSTEM_DISK}
+        # CACHE
+        CACHE_STORE: ${CACHE_STORE}
+        CACHE_PREFIX: ${CACHE_PREFIX}
+        # AWS
+        AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+        AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+        AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+        AWS_BUCKET: ${AWS_BUCKET}
+        AWS_USE_PATH_STYLE_ENDPOINT: ${AWS_USE_PATH_STYLE_ENDPOINT}
+        # REDIS
+        REDIS_CLIENT: ${REDIS_CLIENT}
+        REDIS_HOST: ${REDIS_HOST}
+        REDIS_PASSWORD: ${REDIS_PASSWORD}
+        REDIS_PORT: ${REDIS_PORT}
+        # DATABASE
+        DB_CONNECTION: mysql
+        DB_DATABASE: ${DATABASE_NAME}
+        DB_USERNAME: ${DATABASE_USER}
+        DB_PASSWORD: ${DATABASE_PASSWORD}
+        DB_HOST: ${DATABASE_HOST}
+        # EMAILING
+        MAIL_MAILER: ${MAIL_MAILER}
+        MAIL_SCHEME: ${MAIL_SCHEME}
+        MAIL_HOST: ${MAIL_HOST}
+        MAIL_PORT: ${MAIL_PORT}
+        MAIL_USERNAME: ${MAIL_USERNAME}
+        MAIL_PASSWORD: ${MAIL_PASSWORD}
+        MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
+        MAIL_FROM_NAME: ${MAIL_FROM_NAME}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.backend.rule=Host(`${DOMAIN}`)
+        - traefik.http.routers.backend.tls=true
+      working_dir: /var/www/html
+      volumes:
+        - ./owasp-01:/var/www/html
+        # - ./owasp-06:/var/www/html
+        # - ./owasp-07:/var/www/html
+        # - ./owasp-09:/var/www/html
+        - ./orchestrator/certs:/certs:ro
+
+    database:
+      image: ${HUB_PROXY}/mysql:8.4
+      volumes:
+        - database_owasp_01_volume:/var/lib/mysql
+        # - database_owasp_06_volume:/var/lib/mysql
+        # - database_owasp_07_volume:/var/lib/mysql
+        # - database_owasp_09_volume:/var/lib/mysql
+      environment:
+        MYSQL_DATABASE: ${DATABASE_NAME}
+        MYSQL_USER: ${DATABASE_USER}
+        MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+        MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
+        TZ: UTC
+      healthcheck:
+        test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+        interval: 3s
+        timeout: 3s
+        retries: 20
+
+    database_administration:
+      platform: linux/amd64
+      image: ${HUB_PROXY}/phpmyadmin/phpmyadmin:latest
+      environment:
+        PMA_HOSTS: ${PMA_HOSTS}
+        PMA_USER: "root"
+        PMA_PASSWORD: ${DATABASE_ROOT_PASSWORD}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.database_administration.rule=Host(`pma.${DOMAIN}`)
+        - traefik.http.routers.database_administration.tls=true
+
+    redis:
+      image: ${HUB_PROXY}/redis:alpine
+      command: redis-server --requirepass ${REDIS_PASSWORD}
+      restart: unless-stopped
+      volumes:
+        - redis_volume:/data
+
+    mailing:
+      image: ${HUB_PROXY}/axllent/mailpit:latest
+      restart: unless-stopped
+      volumes:
+        - maildir_volume:/data
+      environment:
+        MP_DATA_FILE: /data/mailpit.db
+        MP_UI_AUTH: ${MAIL_USERNAME}:${MAIL_PASSWORD}
+        MP_SMTP_AUTH: ${MAIL_USERNAME}:${MAIL_PASSWORD}
+        MP_SMTP_AUTH_ALLOW_INSECURE: 1
+        TZ: Europe/Paris
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.mailing.rule=Host(`mailing.${DOMAIN}`)
+        - traefik.http.routers.mailing.tls=true
+        - traefik.http.services.mailing.loadbalancer.server.port=8025
+
+volumes:
+    database_owasp_01_volume:
+    database_owasp_06_volume:
+    database_owasp_07_volume:
+    database_owasp_09_volume:
+    redis_volume:
+    maildir_volume:
