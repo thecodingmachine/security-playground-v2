@@ -95,7 +95,7 @@
                             </span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 text-gray-500 text-xs">{{ $transfer->note ?? '—' }}</td>
+                        <td class="px-6 py-4 text-gray-500 text-xs">{{ $transfer->note ?? '–' }}</td>
                         <td class="px-6 py-4 text-right font-semibold {{ $isSender ? 'text-red-600' : 'text-emerald-600' }}">
                             {{ $isSender ? '-' : '+' }}{{ number_format($transfer->amount, 2, ',', ' ') }} €
                         </td>

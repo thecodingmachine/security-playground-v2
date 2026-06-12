@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>FacturaPro — @yield('title', 'Tableau de bord')</title>
+    <title>FacturaPro | @yield('title', 'Tableau de bord')</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="h-full bg-gray-50 flex">
@@ -56,7 +56,7 @@
                 Mon profil
             </a>
 
-            {{-- Lien admin masqué côté client uniquement — la route n'est pas protégée côté serveur --}}
+            {{-- Lien admin masqué côté client uniquement : la route n'est pas protégée côté serveur --}}
             @if(auth()->user()->role === 'admin')
             <a href="{{ route('admin.dashboard') }}"
                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors

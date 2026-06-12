@@ -19,7 +19,7 @@ class AuthController extends Controller
     }
 
     /**
-     * ⚠️  VULNÉRABLE — 3 failles combinées
+     * ⚠️  VULNÉRABLE : 3 failles combinées
      * 1. Énumération de comptes : messages d'erreur distincts selon l'existence de l'email.
      * 2. Brute-force : aucune limitation du nombre de tentatives.
      * 3. Fixation de session : la session n'est pas régénérée après l'authentification.
@@ -49,7 +49,7 @@ class AuthController extends Controller
         }
 
         Auth::login($user, $request->boolean('remember'));
-        // ⚠️ Session non régénérée — susceptible à la fixation de session
+        // ⚠️ Session non régénérée : susceptible à la fixation de session
 
         return redirect()->intended(route('dashboard'));
     }

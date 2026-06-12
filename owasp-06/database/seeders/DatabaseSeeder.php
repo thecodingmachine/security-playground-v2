@@ -36,7 +36,7 @@ class DatabaseSeeder extends Seeder
 
         ExpenseReport::factory()->approved()->create([
             'user_id' => $alice->id,
-            'title' => 'Déjeuner client Accenture — Paris 8e',
+            'title' => 'Déjeuner client Accenture - Paris 8e',
             'amount' => 87.50,
             'category' => 'repas',
             'description' => 'Déjeuner de travail avec le directeur technique d\'Accenture pour la présentation du projet Q2.',
@@ -45,7 +45,7 @@ class DatabaseSeeder extends Seeder
 
         ExpenseReport::factory()->create([
             'user_id' => $alice->id,
-            'title' => 'Train Paris-Lyon — séminaire annuel',
+            'title' => 'Train Paris-Lyon - séminaire annuel',
             'amount' => 124.00,
             'category' => 'transport',
             'description' => 'Billet TGV aller-retour pour le séminaire commercial du 28 mai.',
@@ -54,7 +54,7 @@ class DatabaseSeeder extends Seeder
 
         ExpenseReport::factory()->rejected()->create([
             'user_id' => $bob->id,
-            'title' => 'Abonnement logiciel — Figma Pro',
+            'title' => 'Abonnement logiciel - Figma Pro',
             'amount' => 45.00,
             'category' => 'fournitures',
             'description' => 'Renouvellement annuel de la licence Figma. Refusé : non budgété.',
@@ -63,7 +63,7 @@ class DatabaseSeeder extends Seeder
 
         ExpenseReport::factory()->create([
             'user_id' => $bob->id,
-            'title' => 'Hôtel Ibis — déplacement Lyon',
+            'title' => 'Hôtel Ibis - déplacement Lyon',
             'amount' => 95.00,
             'category' => 'hébergement',
             'description' => 'Une nuit à Lyon pour le séminaire commercial.',

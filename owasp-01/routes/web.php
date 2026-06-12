@@ -33,7 +33,7 @@ Route::middleware('auth')->group(function () {
     // Documents
     Route::get('/documents/download', [DocumentController::class, 'download'])->name('documents.download'); // ⚠️ path traversal
 
-    // Administration — ⚠️ forced browsing (pas de vérification de rôle)
+    // Administration : ⚠️ forced browsing (pas de vérification de rôle)
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
 
     // Guide de challenges

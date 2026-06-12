@@ -20,9 +20,8 @@ class ProfileController extends Controller
     }
 
     /**
-     * ⚠️  VULNÉRABLE — Escalade verticale de privilèges
-     * Le champ `role` est inclus dans $request->only() et donc accepté
-     * depuis l'entrée utilisateur, sans aucune restriction.
+     * ⚠️  VULNÉRABLE : Escalade verticale de privilèges
+     * Tous les champs de la requête sont passés directement au modèle sans filtrage.
      * Un attaquant peut s'auto-promouvoir en envoyant role=admin dans la requête.
      */
     public function update(Request $request): RedirectResponse
@@ -36,7 +35,7 @@ class ProfileController extends Controller
         $user = Auth::user();
 
         /** @var array<string, mixed> $data */
-        $data = $request->only(['name', 'email', 'role']);
+        $data = $request->except('_token');
         $user->update($data);
 
         return redirect()->route('profile.show')

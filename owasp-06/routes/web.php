@@ -24,7 +24,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
     Route::get('/expenses/{expense}', [ExpenseController::class, 'show'])->name('expenses.show');
 
-    // ⚠️ VULNÉRABLE — upload sans restriction de type, taille ou emplacement
+    // ⚠️ VULNÉRABLE : upload sans restriction de type, taille ou emplacement
     Route::post('/expenses/{expense}/attachments', [AttachmentController::class, 'store'])->name('attachments.store');
 
     Route::get('/challenges', [ChallengeController::class, 'index'])->name('challenges.index');

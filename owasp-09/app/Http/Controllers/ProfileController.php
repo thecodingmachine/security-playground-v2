@@ -23,7 +23,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * ⚠️  VULNÉRABLE — Injection de logs
+     * ⚠️  VULNÉRABLE : Injection de logs
      * Le nom de l'utilisateur est interpolé directement dans le message de log.
      * Un attaquant peut y glisser des retours à la ligne (\n) pour fabriquer
      * de fausses entrées de log (ex. : une fausse connexion admin réussie).
@@ -45,7 +45,7 @@ class ProfileController extends Controller
         /** @var string $name */
         $name = $data['name'];
 
-        // ⚠️ Interpolation directe — si $name contient \n, l'attaquant forge des lignes de log
+        // ⚠️ Interpolation directe : si $name contient \n, l'attaquant forge des lignes de log
         Log::info("profile_updated: {$name}");
 
         return redirect()->route('profile.show')

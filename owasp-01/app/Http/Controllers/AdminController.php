@@ -9,7 +9,7 @@ use Illuminate\View\View;
 class AdminController extends Controller
 {
     /**
-     * ⚠️  VULNÉRABLE — Forced Browsing
+     * ⚠️  VULNÉRABLE : Forced Browsing
      * La route est protégée par le middleware `auth` (authentification),
      * mais aucune vérification du rôle n'est effectuée côté serveur.
      * Le lien "Administration" est uniquement masqué côté client (Blade @if).

@@ -24,7 +24,7 @@ class InvoiceController extends Controller
     }
 
     /**
-     * ⚠️  VULNÉRABLE — IDOR (Insecure Direct Object Reference)
+     * ⚠️  VULNÉRABLE : IDOR (Insecure Direct Object Reference)
      * L'identifiant provient directement de l'URL sans vérification d'ownership.
      * Un utilisateur authentifié peut accéder aux factures d'autres utilisateurs
      * en changeant simplement l'ID dans l'URL.
@@ -37,7 +37,7 @@ class InvoiceController extends Controller
     }
 
     /**
-     * ⚠️  VULNÉRABLE — Méthode HTTP non protégée
+     * ⚠️  VULNÉRABLE : Méthode HTTP non protégée
      * La route GET /invoices/{id} vérifie l'ownership (via show()),
      * mais cette route DELETE ne le fait pas.
      * Un attaquant peut supprimer n'importe quelle facture.

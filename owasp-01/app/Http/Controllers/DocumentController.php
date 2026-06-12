@@ -8,12 +8,12 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class DocumentController extends Controller
 {
     /**
-     * ⚠️  VULNÉRABLE — Path Traversal
+     * ⚠️  VULNÉRABLE : Path Traversal
      * Le paramètre `file` est utilisé directement pour construire le chemin
      * sans validation ni normalisation. Une séquence `../` permet de sortir
      * du répertoire autorisé et d'accéder à n'importe quel fichier du système.
      *
-     * Exemple d'exploit : GET /documents/download?file=../../../.env
+     * Exemple d'exploit : GET /documents/download?file=../../../../../../etc/passwd
      */
     public function download(Request $request): BinaryFileResponse
     {

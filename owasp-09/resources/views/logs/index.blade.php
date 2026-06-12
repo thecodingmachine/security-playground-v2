@@ -12,7 +12,7 @@
 
     <div class="bg-gray-950 rounded-xl p-5 overflow-auto max-h-[70vh]">
         @forelse($lines as $line)
-        {{-- ⚠️ VULNÉRABLE — XSS : contenu affiché sans encodage HTML --}}
+        {{-- ⚠️ VULNÉRABLE : XSS : contenu affiché sans encodage HTML --}}
         <div class="text-xs font-mono text-gray-300 leading-relaxed whitespace-pre-wrap break-all">{!! $line !!}</div>
         @empty
         <p class="text-sm text-gray-500 font-mono">Aucune entrée de log. Effectuez des actions dans l'application pour générer des entrées.</p>

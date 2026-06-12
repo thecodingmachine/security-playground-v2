@@ -85,7 +85,7 @@
                     </div>
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Code vulnérable → corrigé</p>
-                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE — InvoiceController::show()</span>
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE : InvoiceController::show()</span>
 <span class="text-yellow-300">$invoice</span> = Invoice::query()->with([<span class="text-green-300">'user'</span>, <span class="text-green-300">'documents'</span>])<span class="text-red-400">->findOrFail($id)</span>;
 
 <span class="text-green-400">// ✅ CORRIGÉ</span>
@@ -129,7 +129,7 @@
                     Révéler l'indice
                 </summary>
                 <div class="px-4 py-3 bg-amber-50 border-t border-amber-200 space-y-1.5">
-                    <p class="text-sm text-amber-800">• Le lien n'est pas visible dans le menu — cela suffit-il à protéger la page ?</p>
+                    <p class="text-sm text-amber-800">• Le lien n'est pas visible dans le menu : cela suffit-il à protéger la page ?</p>
                     <p class="text-sm text-amber-800">• Quelle URL correspond habituellement à un panneau d'administration ?</p>
                 </div>
             </details>
@@ -147,23 +147,29 @@
                     </div>
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Code vulnérable → corrigé</p>
-                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE — seul le middleware `auth` est actif</span>
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE : seul le middleware `auth` est actif</span>
 <span class="text-blue-300">public function</span> <span class="text-yellow-300">index</span>(): View
 {
     <span class="text-yellow-300">$users</span> = User::query()->withCount(<span class="text-green-300">'invoices'</span>)->get();
     <span class="text-blue-300">return</span> view(<span class="text-green-300">'admin.dashboard'</span>, compact(<span class="text-green-300">'users'</span>));
 }
 
-<span class="text-green-400">// ✅ CORRIGÉ</span>
-<span class="text-blue-300">public function</span> <span class="text-yellow-300">index</span>(): View
+<span class="text-green-400">// ✅ CORRIGÉ : middleware dédié sur la route</span>
+Route::<span class="text-yellow-300">get</span>(<span class="text-green-300">'/admin'</span>, [AdminController::class, <span class="text-green-300">'index'</span>])
+    ->name(<span class="text-green-300">'admin.dashboard'</span>)
+    ->middleware(<span class="text-green-300">'admin'</span>);
+
+<span class="text-gray-500">// app/Http/Middleware/EnsureUserIsAdmin.php</span>
+<span class="text-blue-300">public function</span> <span class="text-yellow-300">handle</span>(Request <span class="text-yellow-300">$request</span>, Closure <span class="text-yellow-300">$next</span>): Response
 {
-    <span class="text-green-400">abort_if</span>(Auth::user()->role !== <span class="text-green-300">'admin'</span>, <span class="text-orange-300">403</span>);
-    <span class="text-yellow-300">$users</span> = User::query()->withCount(<span class="text-green-300">'invoices'</span>)->get();
-    <span class="text-blue-300">return</span> view(<span class="text-green-300">'admin.dashboard'</span>, compact(<span class="text-green-300">'users'</span>));
+    <span class="text-blue-300">if</span> (<span class="text-yellow-300">$request</span>->user()?->role !== <span class="text-green-300">'admin'</span>) {
+        <span class="text-yellow-300">abort</span>(<span class="text-orange-300">403</span>);
+    }
+    <span class="text-blue-300">return</span> <span class="text-yellow-300">$next</span>(<span class="text-yellow-300">$request</span>);
 }</code></pre>
                     </div>
                     <div class="text-xs text-green-700 bg-green-100 rounded-lg px-3 py-2">
-                        <strong>Principe :</strong> Masquer un lien côté client via une directive Blade ne protège pas la route. La vérification doit être faite côté serveur, avant toute exécution de la logique métier.
+                        <strong>Principe :</strong> Masquer un lien côté client via une directive Blade ne protège pas la route. La vérification du rôle doit être centralisée dans un middleware dédié, appliqué directement sur la route, pas dans le contrôleur.
                     </div>
                 </div>
             </details>
@@ -198,7 +204,7 @@
                 </summary>
                 <div class="px-4 py-3 bg-amber-50 border-t border-amber-200 space-y-1.5">
                     <p class="text-sm text-amber-800">• Interceptez la requête POST de mise à jour du profil avec les DevTools (onglet Network).</p>
-                    <p class="text-sm text-amber-800">• Le formulaire ne contient que <em>nom</em> et <em>email</em> — le serveur n'accepterait-il pas d'autres paramètres ?</p>
+                    <p class="text-sm text-amber-800">• Le formulaire ne contient que <em>nom</em> et <em>email</em> : le serveur n'accepterait-il pas d'autres paramètres ?</p>
                 </div>
             </details>
             <details class="border border-green-200 rounded-lg overflow-hidden group">
@@ -222,13 +228,11 @@ fetch(<span class="text-green-300">'/profile'</span>, {
                     </div>
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Code vulnérable → corrigé</p>
-                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE</span>
-<span class="text-yellow-300">$data</span> = <span class="text-yellow-300">$request</span>->only([<span class="text-green-300">'name'</span>, <span class="text-green-300">'email'</span>, <span class="text-red-400">'role'</span>]);
-<span class="text-yellow-300">$user</span>->update(<span class="text-yellow-300">$data</span>);
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE : tous les champs acceptés sans restriction</span>
+<span class="text-yellow-300">$user</span>->update(<span class="text-yellow-300">$request</span>->except(<span class="text-green-300">'_token'</span>));
 
-<span class="text-green-400">// ✅ CORRIGÉ — 'role' retiré de only()</span>
-<span class="text-yellow-300">$data</span> = <span class="text-yellow-300">$request</span>->only([<span class="text-green-300">'name'</span>, <span class="text-green-300">'email'</span>]);
-<span class="text-yellow-300">$user</span>->update(<span class="text-yellow-300">$data</span>);</code></pre>
+<span class="text-green-400">// ✅ CORRIGÉ : seuls les champs autorisés sont acceptés</span>
+<span class="text-yellow-300">$user</span>->update(<span class="text-yellow-300">$request</span>->only([<span class="text-green-300">'name'</span>, <span class="text-green-300">'email'</span>]));</code></pre>
                     </div>
                     <div class="text-xs text-green-700 bg-green-100 rounded-lg px-3 py-2">
                         <strong>Principe :</strong> Le serveur doit limiter explicitement les champs acceptés aux seuls champs autorisés pour l'utilisateur courant. Ne jamais se fier à l'absence d'un champ dans le formulaire HTML.
@@ -255,7 +259,7 @@ fetch(<span class="text-green-300">'/profile'</span>, {
         <div class="px-6 py-5 space-y-4">
             <p class="text-sm text-gray-600 leading-relaxed">
                 Connectez-vous en tant qu'<strong>Alice</strong>. Certaines factures ont des documents PDF attachés, téléchargeables depuis leur page de détail.
-                Trouvez un moyen de lire le fichier <strong>.env</strong> de l'application depuis cet endpoint de téléchargement.
+                Trouvez un moyen de lire le fichier <strong>/etc/passwd</strong> du serveur depuis cet endpoint de téléchargement.
             </p>
             <details class="border border-amber-200 rounded-lg overflow-hidden group">
                 <summary class="flex items-center gap-2 px-4 py-3 bg-amber-50 cursor-pointer text-sm font-medium text-amber-800 select-none list-none">
@@ -279,9 +283,7 @@ fetch(<span class="text-green-300">'/profile'</span>, {
                 <div class="px-4 py-4 bg-green-50 border-t border-green-200 space-y-4">
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Exploit</p>
-                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-3 text-xs overflow-x-auto"><code>/documents/download?file=<span class="text-red-400">../../../.env</span>
-
-<span class="text-gray-500">// storage/app/documents/../../../  →  racine du projet  →  .env</span></code></pre>
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-3 text-xs overflow-x-auto"><code>/documents/download?file=<span class="text-red-400">../../../../../../etc/passwd</span></code></pre>
                     </div>
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Code vulnérable → corrigé</p>
@@ -355,7 +357,7 @@ fetch(<span class="text-green-300">'/invoices/6'</span>, {
                     </div>
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Code vulnérable → corrigé</p>
-                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE — InvoiceController::destroy()</span>
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE : InvoiceController::destroy()</span>
 <span class="text-yellow-300">$invoice</span> = Invoice::query()-><span class="text-red-400">findOrFail</span>(<span class="text-yellow-300">$id</span>);
 
 <span class="text-green-400">// ✅ CORRIGÉ</span>

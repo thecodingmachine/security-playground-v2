@@ -37,7 +37,7 @@ class TransferController extends Controller
     }
 
     /**
-     * ⚠️  VULNÉRABLE — 3 failles combinées
+     * ⚠️  VULNÉRABLE : 3 failles combinées
      * 1. Données sensibles : les en-têtes HTTP (incluant le cookie de session) sont journalisés.
      * 2. Exception silencieuse : les erreurs de transfert ne sont pas journalisées.
      * 3. Injection via message : la note utilisateur est interpolée dans le message de log.
@@ -47,20 +47,18 @@ class TransferController extends Controller
         /** @var User $currentUser */
         $currentUser = Auth::user();
 
+        /** @var array{amount: string, recipient_id: string, note: string|null} $validated */
         $validated = $request->validate([
             'recipient_id' => ['required', 'integer', 'exists:users,id', Rule::notIn([$currentUser->id])],
             'amount' => 'required|numeric|min:0.01|max:999999.99',
             'note' => 'nullable|string|max:255',
         ]);
 
-        /** @var float $amount */
         $amount = (float) $validated['amount'];
-        /** @var int $recipientId */
         $recipientId = (int) $validated['recipient_id'];
-        /** @var string $note */
-        $note = (string) ($validated['note'] ?? '');
+        $note = $validated['note'] ?? '';
 
-        // ⚠️ VULNÉRABLE — Challenge 2 : en-têtes HTTP journalisés (contient le cookie de session)
+        // ⚠️ VULNÉRABLE : Challenge 2 : en-têtes HTTP journalisés (contient le cookie de session)
         Log::info('transfer_initiated', [
             'sender_id' => $currentUser->id,
             'recipient_id' => $recipientId,
@@ -84,13 +82,13 @@ class TransferController extends Controller
                 ]);
             });
 
-            // ⚠️ VULNÉRABLE — Challenge 5 : note utilisateur interpolée dans le message de log
+            // ⚠️ VULNÉRABLE : Challenge 5 : note utilisateur interpolée dans le message de log
             Log::info("transfer_success note=\"{$note}\"");
 
             return redirect()->route('dashboard')->with('success', 'Virement effectué avec succès.');
 
         } catch (\Throwable $e) {
-            // ⚠️ VULNÉRABLE — Challenge 4 : exception non journalisée — l'application est aveugle à cette erreur
+            // ⚠️ VULNÉRABLE : Challenge 4 : exception non journalisée : l'application est aveugle à cette erreur
             return back()->with('error', 'La transaction a échoué. Veuillez réessayer.');
         }
     }
