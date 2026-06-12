@@ -55,7 +55,7 @@ class AttachmentController extends Controller
             'expense_report_id' => $expense->id,
             'user_id' => $currentUser->id,
             'original_name' => $originalName,
-            'stored_path' => 'uploads/' . $originalName, // ❌ Erreur 5 : chemin public retourné
+            'stored_path' => 'uploads/'.$originalName, // ❌ Erreur 5 : chemin public retourné
             'mime_type' => $mimeType,
         ]);
 

@@ -125,13 +125,10 @@ curl https://owasp.localhost/uploads/shell.php?cmd=id
 <span class="text-gray-500">// Erreur 1 : validation sans restriction de type ni de taille</span>
 $request->validate([<span class="text-yellow-300">'file'</span> => [<span class="text-green-300">'required'</span>, <span class="text-green-300">'file'</span>]]);
 
-<span class="text-gray-500">// Erreur 2 : MIME type fourni par le navigateur (falsifiable)</span>
-<span class="text-yellow-300">$mimeType</span> = <span class="text-yellow-300">$file</span>->getClientMimeType();
-
-<span class="text-gray-500">// Erreur 3 : nom original conservé ("shell.php" passe tel quel)</span>
+<span class="text-gray-500">// Erreur 2 : nom original conservé ("shell.php" passe tel quel)</span>
 <span class="text-yellow-300">$originalName</span> = <span class="text-yellow-300">$file</span>->getClientOriginalName();
 
-<span class="text-gray-500">// Erreur 4 : stockage dans public/uploads/ (accessible via URL)</span>
+<span class="text-gray-500">// Erreur 3 : stockage dans public/uploads/ (accessible via URL)</span>
 <span class="text-yellow-300">$file</span>->move(public_path(<span class="text-green-300">'uploads'</span>), <span class="text-yellow-300">$originalName</span>);
 
 
@@ -144,13 +141,10 @@ $request->validate([<span class="text-yellow-300">'file'</span> => [
     <span class="text-green-300">'mimes:jpeg,png,pdf'</span>,   <span class="text-gray-500">// vérification par magic bytes</span>
 ]]);
 
-<span class="text-gray-500">// Règle 2 : vérification du MIME type réel (double sécurité)</span>
-<span class="text-yellow-300">$realMime</span> = <span class="text-yellow-300">$file</span>->getMimeType(); <span class="text-gray-500">// magic bytes, pas la déclaration client</span>
-
-<span class="text-gray-500">// Règle 3 : nom aléatoire : le nom original est ignoré</span>
+<span class="text-gray-500">// Règle 2 : nom aléatoire : le nom original est ignoré</span>
 <span class="text-yellow-300">$safeName</span> = Str::random(<span class="text-blue-300">32</span>) . <span class="text-green-300">'.'</span> . <span class="text-yellow-300">$file</span>->extension();
 
-<span class="text-gray-500">// Règle 4 : stockage hors du répertoire public (disk 'private')</span>
+<span class="text-gray-500">// Règle 3 : stockage hors du répertoire public (disk 'private')</span>
 <span class="text-yellow-300">$file</span>->storeAs(<span class="text-green-300">'uploads'</span>, <span class="text-yellow-300">$safeName</span>, disk: <span class="text-green-300">'private'</span>);</code></pre>
                     </div>
 

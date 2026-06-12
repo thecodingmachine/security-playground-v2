@@ -17,13 +17,13 @@ class AttachmentFactory extends Factory
      */
     public function definition(): array
     {
-        $name = fake()->word() . '.pdf';
+        $name = fake()->word().'.pdf';
 
         return [
             'expense_report_id' => ExpenseReport::factory(),
             'user_id' => User::factory(),
             'original_name' => $name,
-            'stored_path' => 'uploads/' . $name,
+            'stored_path' => 'uploads/'.$name,
             'mime_type' => 'application/pdf',
         ];
     }
