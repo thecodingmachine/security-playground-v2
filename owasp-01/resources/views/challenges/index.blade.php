@@ -228,13 +228,11 @@ fetch(<span class="text-green-300">'/profile'</span>, {
                     </div>
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Code vulnérable → corrigé</p>
-                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE</span>
-<span class="text-yellow-300">$data</span> = <span class="text-yellow-300">$request</span>->only([<span class="text-green-300">'name'</span>, <span class="text-green-300">'email'</span>, <span class="text-red-400">'role'</span>]);
-<span class="text-yellow-300">$user</span>->update(<span class="text-yellow-300">$data</span>);
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE : tous les champs acceptés sans restriction</span>
+<span class="text-yellow-300">$user</span>->update(<span class="text-yellow-300">$request</span>->except(<span class="text-green-300">'_token'</span>));
 
-<span class="text-green-400">// ✅ CORRIGÉ : 'role' retiré de only()</span>
-<span class="text-yellow-300">$data</span> = <span class="text-yellow-300">$request</span>->only([<span class="text-green-300">'name'</span>, <span class="text-green-300">'email'</span>]);
-<span class="text-yellow-300">$user</span>->update(<span class="text-yellow-300">$data</span>);</code></pre>
+<span class="text-green-400">// ✅ CORRIGÉ : seuls les champs autorisés sont acceptés</span>
+<span class="text-yellow-300">$user</span>->update(<span class="text-yellow-300">$request</span>->only([<span class="text-green-300">'name'</span>, <span class="text-green-300">'email'</span>]));</code></pre>
                     </div>
                     <div class="text-xs text-green-700 bg-green-100 rounded-lg px-3 py-2">
                         <strong>Principe :</strong> Le serveur doit limiter explicitement les champs acceptés aux seuls champs autorisés pour l'utilisateur courant. Ne jamais se fier à l'absence d'un champ dans le formulaire HTML.
