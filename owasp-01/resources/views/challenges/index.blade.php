@@ -154,16 +154,22 @@
     <span class="text-blue-300">return</span> view(<span class="text-green-300">'admin.dashboard'</span>, compact(<span class="text-green-300">'users'</span>));
 }
 
-<span class="text-green-400">// ✅ CORRIGÉ</span>
-<span class="text-blue-300">public function</span> <span class="text-yellow-300">index</span>(): View
+<span class="text-green-400">// ✅ CORRIGÉ : middleware dédié sur la route</span>
+Route::<span class="text-yellow-300">get</span>(<span class="text-green-300">'/admin'</span>, [AdminController::class, <span class="text-green-300">'index'</span>])
+    ->name(<span class="text-green-300">'admin.dashboard'</span>)
+    ->middleware(<span class="text-green-300">'admin'</span>);
+
+<span class="text-gray-500">// app/Http/Middleware/EnsureUserIsAdmin.php</span>
+<span class="text-blue-300">public function</span> <span class="text-yellow-300">handle</span>(Request <span class="text-yellow-300">$request</span>, Closure <span class="text-yellow-300">$next</span>): Response
 {
-    <span class="text-green-400">abort_if</span>(Auth::user()->role !== <span class="text-green-300">'admin'</span>, <span class="text-orange-300">403</span>);
-    <span class="text-yellow-300">$users</span> = User::query()->withCount(<span class="text-green-300">'invoices'</span>)->get();
-    <span class="text-blue-300">return</span> view(<span class="text-green-300">'admin.dashboard'</span>, compact(<span class="text-green-300">'users'</span>));
+    <span class="text-blue-300">if</span> (<span class="text-yellow-300">$request</span>->user()?->role !== <span class="text-green-300">'admin'</span>) {
+        <span class="text-yellow-300">abort</span>(<span class="text-orange-300">403</span>);
+    }
+    <span class="text-blue-300">return</span> <span class="text-yellow-300">$next</span>(<span class="text-yellow-300">$request</span>);
 }</code></pre>
                     </div>
                     <div class="text-xs text-green-700 bg-green-100 rounded-lg px-3 py-2">
-                        <strong>Principe :</strong> Masquer un lien côté client via une directive Blade ne protège pas la route. La vérification doit être faite côté serveur, avant toute exécution de la logique métier.
+                        <strong>Principe :</strong> Masquer un lien côté client via une directive Blade ne protège pas la route. La vérification du rôle doit être centralisée dans un middleware dédié, appliqué directement sur la route, pas dans le contrôleur.
                     </div>
                 </div>
             </details>
