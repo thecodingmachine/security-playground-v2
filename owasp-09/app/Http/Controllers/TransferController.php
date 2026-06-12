@@ -47,18 +47,16 @@ class TransferController extends Controller
         /** @var User $currentUser */
         $currentUser = Auth::user();
 
+        /** @var array{amount: string, recipient_id: string, note: string|null} $validated */
         $validated = $request->validate([
             'recipient_id' => ['required', 'integer', 'exists:users,id', Rule::notIn([$currentUser->id])],
             'amount' => 'required|numeric|min:0.01|max:999999.99',
             'note' => 'nullable|string|max:255',
         ]);
 
-        /** @var float $amount */
         $amount = (float) $validated['amount'];
-        /** @var int $recipientId */
         $recipientId = (int) $validated['recipient_id'];
-        /** @var string $note */
-        $note = (string) ($validated['note'] ?? '');
+        $note = $validated['note'] ?? '';
 
         // ⚠️ VULNÉRABLE : Challenge 2 : en-têtes HTTP journalisés (contient le cookie de session)
         Log::info('transfer_initiated', [

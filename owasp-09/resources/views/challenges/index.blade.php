@@ -113,7 +113,7 @@
                         <span class="text-xs font-bold text-purple-600 uppercase tracking-wider">Challenge 2</span>
                         <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">Données sensibles dans les logs</span>
                     </div>
-                    <h3 class="text-base font-semibold text-gray-900">Le cookie de session est journalisé en clair lors d'un virement</h3>
+                    <h3 class="text-base font-semibold text-gray-900">Une donnée sensible est journalisée en clair lors d'un virement</h3>
                 </div>
                 <span class="text-amber-400 text-sm">⭐⭐⭐</span>
             </div>
@@ -256,7 +256,7 @@ Log::info(<span class="text-green-300">'profile_updated'</span>, [
                         <span class="text-xs font-bold text-red-600 uppercase tracking-wider">Challenge 4</span>
                         <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Exception silencieuse</span>
                     </div>
-                    <h3 class="text-base font-semibold text-gray-900">Une erreur de transaction est avalée sans aucune trace dans les logs</h3>
+                    <h3 class="text-base font-semibold text-gray-900">Une erreur de transaction disparaît sans laisser de trace dans les logs</h3>
                 </div>
                 <span class="text-amber-400 text-sm">⭐⭐</span>
             </div>
