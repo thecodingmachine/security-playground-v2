@@ -20,7 +20,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * ⚠️  VULNÉRABLE — Escalade verticale de privilèges
+     * ⚠️  VULNÉRABLE : Escalade verticale de privilèges
      * Le champ `role` est inclus dans $request->only() et donc accepté
      * depuis l'entrée utilisateur, sans aucune restriction.
      * Un attaquant peut s'auto-promouvoir en envoyant role=admin dans la requête.

@@ -18,7 +18,7 @@ class AuthController extends Controller
     }
 
     /**
-     * ⚠️  VULNÉRABLE — Journalisation insuffisante
+     * ⚠️  VULNÉRABLE : Journalisation insuffisante
      * Seules les connexions réussies sont journalisées.
      * Les échecs d'authentification ne laissent aucune trace,
      * rendant les attaques par force brute indétectables.
@@ -42,7 +42,7 @@ class AuthController extends Controller
             return redirect()->intended(route('dashboard'));
         }
 
-        // ⚠️ Échec non journalisé — les tentatives infructueuses sont invisibles
+        // ⚠️ Échec non journalisé : les tentatives infructueuses sont invisibles
 
         return back()
             ->withErrors(['email' => 'Identifiants incorrects.'])

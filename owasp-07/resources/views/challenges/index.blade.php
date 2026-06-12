@@ -140,7 +140,7 @@
                     </div>
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Code vulnérable → corrigé</p>
-                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE — AuthController::login()</span>
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE : AuthController::login()</span>
 <span class="text-blue-300">if</span> (!<span class="text-yellow-300">$user</span>) {
     <span class="text-blue-300">return</span> back()->withErrors([<span class="text-green-300">'email'</span> => <span class="text-red-400">'Aucun compte associé à cette adresse.'</span>]);
 }
@@ -148,7 +148,7 @@
     <span class="text-blue-300">return</span> back()->withErrors([<span class="text-green-300">'email'</span> => <span class="text-red-400">'Mot de passe incorrect.'</span>]);
 }
 
-<span class="text-green-400">// ✅ CORRIGÉ — message générique unique</span>
+<span class="text-green-400">// ✅ CORRIGÉ : message générique unique</span>
 <span class="text-blue-300">if</span> (!<span class="text-yellow-300">$user</span> || !Hash::check(<span class="text-yellow-300">$request</span>->password, <span class="text-yellow-300">$user</span>->password)) {
     <span class="text-blue-300">return</span> back()->withErrors([<span class="text-green-300">'email'</span> => <span class="text-green-300">'Identifiants incorrects.'</span>]);
 }</code></pre>
@@ -218,7 +218,7 @@ TOKEN=$(curl -sc /tmp/cookies https://owasp.localhost/login | \
                     </div>
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Correction</p>
-                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-green-400">// ✅ CORRIGÉ — ajouter le middleware throttle sur la route de login</span>
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-green-400">// ✅ CORRIGÉ : ajouter le middleware throttle sur la route de login</span>
 <span class="text-gray-500">// routes/web.php</span>
 Route::post(<span class="text-green-300">'/login'</span>, [AuthController::class, <span class="text-green-300">'login'</span>])
     -><span class="text-green-400">middleware</span>(<span class="text-green-300">'throttle:5,1'</span>); <span class="text-gray-500">// 5 tentatives par minute</span></code></pre>
@@ -277,7 +277,7 @@ Route::post(<span class="text-green-300">'/login'</span>, [AuthController::class
                     </div>
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Code vulnérable → corrigé</p>
-                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE — AuthController::login()</span>
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE : AuthController::login()</span>
 Auth::login(<span class="text-yellow-300">$user</span>, <span class="text-yellow-300">$request</span>->boolean(<span class="text-green-300">'remember'</span>));
 <span class="text-red-400">// session non régénérée</span>
 <span class="text-blue-300">return</span> redirect()->intended(route(<span class="text-green-300">'dashboard'</span>));
@@ -337,18 +337,18 @@ Auth::login(<span class="text-yellow-300">$user</span>, <span class="text-yellow
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Exploit</p>
                         <p class="text-sm text-green-700 mb-2">Le source de la page de connexion contient :</p>
-                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-3 text-xs overflow-x-auto"><code><span class="text-gray-500">&lt;!-- TODO: désactiver avant la livraison — /admin/api/employees --&gt;</span></code></pre>
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-3 text-xs overflow-x-auto"><code><span class="text-gray-500">&lt;!-- TODO: désactiver avant la livraison : /admin/api/employees --&gt;</span></code></pre>
                         <p class="text-sm text-green-700 mt-2">Accéder à <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-green-200 text-xs">/admin/api/employees</span> sans être connecté retourne la liste complète des collaborateurs au format JSON.</p>
                     </div>
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Code vulnérable → corrigé</p>
-                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE — routes/web.php</span>
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE : routes/web.php</span>
 Route::prefix(<span class="text-green-300">'admin'</span>)->group(function () {
     Route::get(<span class="text-green-300">'/'</span>, [AdminController::class, <span class="text-green-300">'index'</span>])->middleware(<span class="text-green-300">'auth'</span>);
     Route::get(<span class="text-green-300">'/api/employees'</span>, [AdminController::class, <span class="text-green-300">'apiEmployees'</span>]); <span class="text-red-400">// pas de middleware</span>
 });
 
-<span class="text-green-400">// ✅ CORRIGÉ — middleware auth sur tout le groupe</span>
+<span class="text-green-400">// ✅ CORRIGÉ : middleware auth sur tout le groupe</span>
 Route::prefix(<span class="text-green-300">'admin'</span>)->middleware(<span class="text-green-300">'auth'</span>)->group(function () {
     Route::get(<span class="text-green-300">'/'</span>, [AdminController::class, <span class="text-green-300">'index'</span>]);
     Route::get(<span class="text-green-300">'/api/employees'</span>, [AdminController::class, <span class="text-green-300">'apiEmployees'</span>]);

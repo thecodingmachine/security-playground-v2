@@ -71,7 +71,7 @@ class DatabaseSeeder extends Seeder
                 'status' => $statuses[$index],
                 'issued_at' => now()->subDays(30 + $index * 15),
                 'due_at' => now()->addDays(30 - $index * 5),
-                'notes' => $index === 1 ? 'Prestation de développement — Sprint 3' : null,
+                'notes' => $index === 1 ? 'Prestation de développement - Sprint 3' : null,
             ]);
 
             // Les 3 premières factures de chaque utilisateur ont un document attaché

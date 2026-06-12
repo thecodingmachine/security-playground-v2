@@ -9,7 +9,7 @@ use Illuminate\View\View;
 class LogController extends Controller
 {
     /**
-     * ⚠️  VULNÉRABLE — XSS via visualisateur de logs
+     * ⚠️  VULNÉRABLE : XSS via visualisateur de logs
      * Le contenu du fichier de log est affiché sans encodage HTML ({!! !!}).
      * Toute entrée injectée par un utilisateur contenant du HTML ou du JavaScript
      * sera exécutée dans le navigateur de quiconque consulte cette page.

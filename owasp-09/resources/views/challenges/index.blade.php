@@ -76,11 +76,11 @@
                 <div class="px-4 py-4 bg-green-50 border-t border-green-200 space-y-4">
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Résultat observé</p>
-                        <p class="text-sm text-green-700">Seule la connexion réussie génère une entrée de type <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-green-200 text-xs">authn_login_success</span>. Les 3 tentatives échouées sont invisibles — un attaquant peut faire du brute-force sans laisser aucune trace.</p>
+                        <p class="text-sm text-green-700">Seule la connexion réussie génère une entrée de type <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-green-200 text-xs">authn_login_success</span>. Les 3 tentatives échouées sont invisibles : un attaquant peut faire du brute-force sans laisser aucune trace.</p>
                     </div>
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Code vulnérable → corrigé</p>
-                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE — AuthController::login()</span>
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE : AuthController::login()</span>
 <span class="text-blue-300">if</span> (Auth::attempt(<span class="text-yellow-300">$credentials</span>)) {
     Log::info(<span class="text-green-300">'authn_login_success'</span>, [...]);
     <span class="text-blue-300">return</span> redirect()->intended(...);
@@ -151,14 +151,14 @@
                     </div>
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Code vulnérable → corrigé</p>
-                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE — TransferController::store()</span>
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE : TransferController::store()</span>
 Log::info(<span class="text-green-300">'transfer_initiated'</span>, [
     <span class="text-green-300">'sender_id'</span> => <span class="text-yellow-300">$currentUser</span>->id,
     <span class="text-green-300">'amount'</span> => <span class="text-yellow-300">$amount</span>,
     <span class="text-red-400">'request_headers'</span> => <span class="text-yellow-300">$request</span>->headers->all(), <span class="text-red-400">// ← cookie de session</span>
 ]);
 
-<span class="text-green-400">// ✅ CORRIGÉ — seulement les métadonnées métier</span>
+<span class="text-green-400">// ✅ CORRIGÉ : seulement les métadonnées métier</span>
 Log::info(<span class="text-green-300">'transfer_initiated'</span>, [
     <span class="text-green-300">'sender_id'</span> => <span class="text-yellow-300">$currentUser</span>->id,
     <span class="text-green-300">'recipient_id'</span> => <span class="text-yellow-300">$recipientId</span>,
@@ -230,10 +230,10 @@ fetch(<span class="text-green-300">'/profile'</span>, {
                     </div>
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Code vulnérable → corrigé</p>
-                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE — ProfileController::update()</span>
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE : ProfileController::update()</span>
 Log::info(<span class="text-red-400">"profile_updated: {$name}"</span>); <span class="text-red-400">// interpolation directe</span>
 
-<span class="text-green-400">// ✅ CORRIGÉ — données dans le contexte JSON</span>
+<span class="text-green-400">// ✅ CORRIGÉ : données dans le contexte JSON</span>
 Log::info(<span class="text-green-300">'profile_updated'</span>, [
     <span class="text-green-300">'user_id'</span> => <span class="text-yellow-300">$user</span>->id,
     <span class="text-green-300">'name'</span> => preg_replace(<span class="text-green-300">'/[\x00-\x1F\x7F]/u'</span>, <span class="text-green-300">''</span>, mb_substr(<span class="text-yellow-300">$name</span>, <span class="text-orange-300">0</span>, <span class="text-orange-300">256</span>)),
@@ -288,13 +288,13 @@ Log::info(<span class="text-green-300">'profile_updated'</span>, [
                 <div class="px-4 py-4 bg-green-50 border-t border-green-200 space-y-4">
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Résultat observé</p>
-                        <p class="text-sm text-green-700">Le log montre l'entrée <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-green-200 text-xs">transfer_initiated</span> mais aucune entrée <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-green-200 text-xs">transfer_failure</span>. L'application est aveugle à sa propre erreur — un opérateur de supervision ne saurait jamais que des transactions échouent.</p>
+                        <p class="text-sm text-green-700">Le log montre l'entrée <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-green-200 text-xs">transfer_initiated</span> mais aucune entrée <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-green-200 text-xs">transfer_failure</span>. L'application est aveugle à sa propre erreur : un opérateur de supervision ne saurait jamais que des transactions échouent.</p>
                     </div>
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Code vulnérable → corrigé</p>
-                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE — TransferController::store()</span>
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE : TransferController::store()</span>
 } <span class="text-blue-300">catch</span> (\Throwable <span class="text-yellow-300">$e</span>) {
-    <span class="text-red-400">// Exception silencieuse — aucune trace</span>
+    <span class="text-red-400">// Exception silencieuse : aucune trace</span>
     <span class="text-blue-300">return</span> back()->with(<span class="text-green-300">'error'</span>, <span class="text-green-300">'La transaction a échoué.'</span>);
 }
 
@@ -344,7 +344,7 @@ Log::info(<span class="text-green-300">'profile_updated'</span>, [
                 </summary>
                 <div class="px-4 py-3 bg-amber-50 border-t border-amber-200 space-y-1.5">
                     <p class="text-sm text-amber-800">• Le motif d'un virement est journalisé via une interpolation de chaîne dans le message de log.</p>
-                    <p class="text-sm text-amber-800">• Le visualisateur affiche les logs avec @verbatim<span class="font-mono bg-amber-100 px-1 rounded">{!! $line !!}</span>@endverbatim — sans encodage HTML.</p>
+                    <p class="text-sm text-amber-800">• Le visualisateur affiche les logs avec @verbatim<span class="font-mono bg-amber-100 px-1 rounded">{!! $line !!}</span>@endverbatim : sans encodage HTML.</p>
                     <p class="text-sm text-amber-800">• Essayez un motif de type : <span class="font-mono bg-amber-100 px-1 rounded text-xs">&lt;img src=x onerror="alert(1)"&gt;</span></p>
                 </div>
             </details>
@@ -365,10 +365,10 @@ Log::info(<span class="text-green-300">'profile_updated'</span>, [
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Code vulnérable → corrigé</p>
 @verbatim
-                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">{{-- ❌ VULNÉRABLE — logs/index.blade.php --}}</span>
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">{{-- ❌ VULNÉRABLE : logs/index.blade.php --}}</span>
 &lt;div&gt;{!! <span class="text-yellow-300">$line</span> !!}&lt;/div&gt; <span class="text-red-400">{{-- HTML brut --}}</span>
 
-<span class="text-green-400">{{-- ✅ CORRIGÉ — encodage automatique par Blade --}}</span>
+<span class="text-green-400">{{-- ✅ CORRIGÉ : encodage automatique par Blade --}}</span>
 &lt;div&gt;{{ <span class="text-yellow-300">$line</span> }}&lt;/div&gt;</code></pre>
 @endverbatim
                     </div>

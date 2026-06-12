@@ -44,7 +44,7 @@ class DatabaseSeeder extends Seeder
 
         Announcement::factory()->create([
             'user_id' => $maintenance->id,
-            'title' => 'Maintenance planifiée — samedi 25 janvier',
+            'title' => 'Maintenance planifiée - samedi 25 janvier',
             'content' => 'Une interruption de service est prévue le samedi 25 janvier de 2h à 6h pour la mise à jour des serveurs. Pensez à sauvegarder vos travaux en cours avant vendredi soir.',
             'category' => 'urgent',
         ]);

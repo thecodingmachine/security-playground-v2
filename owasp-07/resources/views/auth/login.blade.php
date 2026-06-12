@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CorpHub — Connexion</title>
+    <title>CorpHub | Connexion</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="h-full bg-gray-50 flex items-center justify-center">
@@ -79,7 +79,7 @@
     </div>
 </div>
 
-<!-- TODO: désactiver avant la livraison — /admin/api/employees -->
+<!-- TODO: désactiver avant la livraison : /admin/api/employees -->
 
 </body>
 </html>

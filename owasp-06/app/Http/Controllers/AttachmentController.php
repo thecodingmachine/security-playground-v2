@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 class AttachmentController extends Controller
 {
     /**
-     * ⚠️ VULNÉRABLE — Upload non restreint de fichiers
+     * ⚠️ VULNÉRABLE : Upload non restreint de fichiers
      *
      * Cinq erreurs combinées permettent l'exécution de code arbitraire :
      * 1. Validation trop permissive : aucun contrôle de type MIME réel ni de taille.
@@ -31,7 +31,7 @@ class AttachmentController extends Controller
 
         abort_if($expense->user_id !== $currentUser->id, 403);
 
-        // ❌ Erreur 1 — aucune restriction de type ou de taille
+        // ❌ Erreur 1 : aucune restriction de type ou de taille
         $request->validate([
             'file' => ['required', 'file'],
         ]);
@@ -39,23 +39,23 @@ class AttachmentController extends Controller
         $file = $request->file('file');
         assert($file instanceof UploadedFile);
 
-        // ❌ Erreur 2 — MIME type déclaré par le client, non vérifié par magic bytes
+        // ❌ Erreur 2 : MIME type déclaré par le client, non vérifié par magic bytes
         $mimeType = $file->getClientMimeType();
         if (! in_array($mimeType, ['image/jpeg', 'image/png', 'application/pdf'], true)) {
             return back()->with('error', 'Type de fichier non autorisé.');
         }
 
-        // ❌ Erreur 3 — nom original conservé tel quel (peut être "shell.php")
+        // ❌ Erreur 3 : nom original conservé tel quel (peut être "shell.php")
         $originalName = $file->getClientOriginalName();
 
-        // ❌ Erreur 4 — stockage dans public/uploads/ : exécutable via URL directe
+        // ❌ Erreur 4 : stockage dans public/uploads/ : exécutable via URL directe
         $file->move(public_path('uploads'), $originalName);
 
         Attachment::query()->create([
             'expense_report_id' => $expense->id,
             'user_id' => $currentUser->id,
             'original_name' => $originalName,
-            'stored_path' => 'uploads/' . $originalName, // ❌ Erreur 5 — chemin public retourné
+            'stored_path' => 'uploads/' . $originalName, // ❌ Erreur 5 : chemin public retourné
             'mime_type' => $mimeType,
         ]);
 

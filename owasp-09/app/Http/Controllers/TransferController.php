@@ -37,7 +37,7 @@ class TransferController extends Controller
     }
 
     /**
-     * ⚠️  VULNÉRABLE — 3 failles combinées
+     * ⚠️  VULNÉRABLE : 3 failles combinées
      * 1. Données sensibles : les en-têtes HTTP (incluant le cookie de session) sont journalisés.
      * 2. Exception silencieuse : les erreurs de transfert ne sont pas journalisées.
      * 3. Injection via message : la note utilisateur est interpolée dans le message de log.
@@ -60,7 +60,7 @@ class TransferController extends Controller
         /** @var string $note */
         $note = (string) ($validated['note'] ?? '');
 
-        // ⚠️ VULNÉRABLE — Challenge 2 : en-têtes HTTP journalisés (contient le cookie de session)
+        // ⚠️ VULNÉRABLE : Challenge 2 : en-têtes HTTP journalisés (contient le cookie de session)
         Log::info('transfer_initiated', [
             'sender_id' => $currentUser->id,
             'recipient_id' => $recipientId,
@@ -84,13 +84,13 @@ class TransferController extends Controller
                 ]);
             });
 
-            // ⚠️ VULNÉRABLE — Challenge 5 : note utilisateur interpolée dans le message de log
+            // ⚠️ VULNÉRABLE : Challenge 5 : note utilisateur interpolée dans le message de log
             Log::info("transfer_success note=\"{$note}\"");
 
             return redirect()->route('dashboard')->with('success', 'Virement effectué avec succès.');
 
         } catch (\Throwable $e) {
-            // ⚠️ VULNÉRABLE — Challenge 4 : exception non journalisée — l'application est aveugle à cette erreur
+            // ⚠️ VULNÉRABLE : Challenge 4 : exception non journalisée : l'application est aveugle à cette erreur
             return back()->with('error', 'La transaction a échoué. Veuillez réessayer.');
         }
     }

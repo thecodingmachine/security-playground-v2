@@ -27,7 +27,7 @@ class AdminController extends Controller
     }
 
     /**
-     * ⚠️  VULNÉRABLE — Bypass par chemin alternatif
+     * ⚠️  VULNÉRABLE : Bypass par chemin alternatif
      * Cette route JSON n'est protégée par aucun middleware d'authentification.
      * Un commentaire HTML laissé par inadvertance dans la page de connexion révèle son existence.
      */

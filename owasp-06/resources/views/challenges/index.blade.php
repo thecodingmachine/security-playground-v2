@@ -120,7 +120,7 @@ curl https://owasp.localhost/uploads/shell.php?cmd=id
 
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Code vulnérable &rarr; corrigé</p>
-                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE — AttachmentController::store()</span>
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-red-400">// ❌ VULNÉRABLE : AttachmentController::store()</span>
 
 <span class="text-gray-500">// Erreur 1 : validation sans restriction de type ni de taille</span>
 $request->validate([<span class="text-yellow-300">'file'</span> => [<span class="text-green-300">'required'</span>, <span class="text-green-300">'file'</span>]]);
@@ -147,7 +147,7 @@ $request->validate([<span class="text-yellow-300">'file'</span> => [
 <span class="text-gray-500">// Règle 2 : vérification du MIME type réel (double sécurité)</span>
 <span class="text-yellow-300">$realMime</span> = <span class="text-yellow-300">$file</span>->getMimeType(); <span class="text-gray-500">// magic bytes, pas la déclaration client</span>
 
-<span class="text-gray-500">// Règle 3 : nom aléatoire — le nom original est ignoré</span>
+<span class="text-gray-500">// Règle 3 : nom aléatoire : le nom original est ignoré</span>
 <span class="text-yellow-300">$safeName</span> = Str::random(<span class="text-blue-300">32</span>) . <span class="text-green-300">'.'</span> . <span class="text-yellow-300">$file</span>->extension();
 
 <span class="text-gray-500">// Règle 4 : stockage hors du répertoire public (disk 'private')</span>
