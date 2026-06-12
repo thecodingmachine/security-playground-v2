@@ -13,7 +13,7 @@ class DocumentController extends Controller
      * sans validation ni normalisation. Une séquence `../` permet de sortir
      * du répertoire autorisé et d'accéder à n'importe quel fichier du système.
      *
-     * Exemple d'exploit : GET /documents/download?file=../../../.env
+     * Exemple d'exploit : GET /documents/download?file=../../../../../../etc/passwd
      */
     public function download(Request $request): BinaryFileResponse
     {

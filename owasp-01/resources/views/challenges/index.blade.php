@@ -259,7 +259,7 @@ fetch(<span class="text-green-300">'/profile'</span>, {
         <div class="px-6 py-5 space-y-4">
             <p class="text-sm text-gray-600 leading-relaxed">
                 Connectez-vous en tant qu'<strong>Alice</strong>. Certaines factures ont des documents PDF attachés, téléchargeables depuis leur page de détail.
-                Trouvez un moyen de lire le fichier <strong>.env</strong> de l'application depuis cet endpoint de téléchargement.
+                Trouvez un moyen de lire le fichier <strong>/etc/passwd</strong> du serveur depuis cet endpoint de téléchargement.
             </p>
             <details class="border border-amber-200 rounded-lg overflow-hidden group">
                 <summary class="flex items-center gap-2 px-4 py-3 bg-amber-50 cursor-pointer text-sm font-medium text-amber-800 select-none list-none">
@@ -283,9 +283,7 @@ fetch(<span class="text-green-300">'/profile'</span>, {
                 <div class="px-4 py-4 bg-green-50 border-t border-green-200 space-y-4">
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Exploit</p>
-                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-3 text-xs overflow-x-auto"><code>/documents/download?file=<span class="text-red-400">../../../.env</span>
-
-<span class="text-gray-500">// storage/app/documents/../../../  →  racine du projet  →  .env</span></code></pre>
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-3 text-xs overflow-x-auto"><code>/documents/download?file=<span class="text-red-400">../../../../../../etc/passwd</span></code></pre>
                     </div>
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Code vulnérable → corrigé</p>
