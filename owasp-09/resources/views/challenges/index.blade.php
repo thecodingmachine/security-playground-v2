@@ -146,7 +146,7 @@
                     <div>
                         <p class="text-xs font-semibold text-green-800 uppercase tracking-wider mb-2">Données exposées</p>
                         <p class="text-sm text-green-700 mb-2">Le log <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-green-200 text-xs">transfer_initiated</span> contient <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-green-200 text-xs">request_headers</span> avec le cookie de session en clair :</p>
-                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-3 text-xs overflow-x-auto"><code>"cookie":["laravel_session=<span class="text-red-400">eyJpdiI6Ik...</span>"]</code></pre>
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-3 text-xs overflow-x-auto"><code>"cookie":["owasp_session=<span class="text-red-400">eyJpdiI6Ik...</span>"]</code></pre>
                         <p class="text-sm text-green-700 mt-2">Quiconque accède à ce fichier de log peut usurper n'importe quelle session active.</p>
                     </div>
                     <div>
