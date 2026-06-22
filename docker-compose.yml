@@ -30,8 +30,8 @@ services:
         APACHE_DOCUMENT_ROOT: public
         # LARAVEL SPECIFICS
         APP_NAME: ${APP_NAME}
-        APP_ENV: dev
-        APP_DEBUG: 1
+        # APP_ENV: dev
+        # APP_DEBUG: 1
         APP_URL: ${HTTP_PROTOCOL}://${DOMAIN}
         APP_KEY: ${APP_KEY}
         APP_LOCALE: ${APP_LOCALE}
@@ -92,9 +92,11 @@ services:
       volumes:
         # - ./owasp-01:/var/www/html
         # - ./owasp-02:/var/www/html
-        - ./owasp-04:/var/www/html
+        # - ./owasp-05:/var/www/html
+        # - ./owasp-04:/var/www/html
         # - ./owasp-06:/var/www/html
         # - ./owasp-07:/var/www/html
+        - ./owasp-08:/var/www/html
         # - ./owasp-09:/var/www/html
         - ./orchestrator/certs:/certs:ro
 
@@ -103,9 +105,11 @@ services:
       volumes:
         # - database_owasp_01_volume:/var/lib/mysql
         # - database_owasp_02_volume:/var/lib/mysql
-        - database_owasp_04_volume:/var/lib/mysql
+        # - database_owasp_05_volume:/var/lib/mysql
+        # - database_owasp_04_volume:/var/lib/mysql
         # - database_owasp_06_volume:/var/lib/mysql
         # - database_owasp_07_volume:/var/lib/mysql
+        - database_owasp_08_volume:/var/lib/mysql
         # - database_owasp_09_volume:/var/lib/mysql
       environment:
         MYSQL_DATABASE: ${DATABASE_NAME}
@@ -158,9 +162,11 @@ services:
 volumes:
     database_owasp_01_volume:
     database_owasp_02_volume:
+    database_owasp_05_volume:
     database_owasp_04_volume:
     database_owasp_06_volume:
     database_owasp_07_volume:
+    database_owasp_08_volume:
     database_owasp_09_volume:
     redis_volume:
     maildir_volume:

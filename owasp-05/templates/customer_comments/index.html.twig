@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Commentaires client{% endblock %}
+
+{% block body %}
+<div class="space-y-6">
+    <div class="bg-white border border-slate-200 rounded-lg p-5">
+        <h2 class="text-2xl font-semibold">Commentaires - {{ customer.company }}</h2>
+        <p class="text-sm text-slate-600 mt-1">Historique de suivi pour {{ customer.name }}.</p>
+    </div>
+
+    {% for message in app.flashes('error') %}
+        <div class="rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <form method="post" action="{{ path('customer_comments_store', {id: customer.id}) }}" class="bg-white border border-slate-200 rounded-lg p-5 space-y-3">
+        <label for="content" class="text-sm font-medium">Nouveau commentaire</label>
+        <textarea id="content" name="content" rows="4" required class="w-full rounded border border-slate-300 px-3 py-2 text-sm"></textarea>
+        <button type="submit" class="rounded bg-slate-900 text-white px-4 py-2 text-sm">Ajouter</button>
+    </form>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+        {% for comment in comments %}
+            <article class="border border-slate-200 rounded p-4">
+                <div class="flex items-center justify-between text-xs text-slate-500 mb-2">
+                    <span>{{ comment.author.fullName }}</span>
+                    <span>{{ comment.createdAt|date('d/m/Y H:i') }}</span>
+                </div>
+                <div class="text-sm text-slate-800">
+                    {{ comment.content|raw }}
+                </div>
+            </article>
+        {% else %}
+            <p class="text-sm text-slate-500">Aucun commentaire pour ce compte.</p>
+        {% endfor %}
+    </section>
+</div>
+{% endblock %}

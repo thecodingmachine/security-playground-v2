@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Commande {{ order.reference }}{% endblock %}
+
+{% block body %}
+<div class="space-y-6">
+    <section class="bg-white border border-slate-200 rounded-lg p-5">
+        <h2 class="text-xl font-semibold">Commande {{ order.reference }}</h2>
+        <dl class="mt-4 grid md:grid-cols-3 gap-4 text-sm">
+            <div>
+                <dt class="text-slate-500">Statut</dt>
+                <dd class="font-medium">{{ order.status }}</dd>
+            </div>
+            <div>
+                <dt class="text-slate-500">Montant</dt>
+                <dd class="font-medium">{{ (order.amountCents / 100)|number_format(2, ',', ' ') }} {{ order.currency }}</dd>
+            </div>
+            <div>
+                <dt class="text-slate-500">Client</dt>
+                <dd class="font-medium">{{ order.customer.fullName }}</dd>
+            </div>
+        </dl>
+    </section>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5">
+        <h3 class="font-semibold">Actions paiement</h3>
+        <div class="mt-3 flex flex-wrap gap-3 text-sm">
+            <a class="rounded bg-slate-900 px-4 py-2 text-white" href="{{ path('checkout_show', {id: order.id}) }}">Payer maintenant</a>
+            <a class="rounded border border-slate-300 px-4 py-2" href="{{ path('payment_return', {
+                order_reference: order.reference,
+                status: 'pending',
+                amount_cents: order.amountCents,
+                currency: order.currency
+            }) }}">Simuler retour navigateur</a>
+        </div>
+    </section>
+</div>
+{% endblock %}
+

@@ -1,0 +1,156 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Challenges A05{% endblock %}
+
+{% block body %}
+<div class="space-y-6">
+    <div class="bg-white border border-slate-200 rounded-lg p-5">
+        <div class="flex items-center gap-2 mb-2">
+            <span class="px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-semibold">OWASP A05:2021</span>
+            <span class="px-2 py-1 rounded bg-slate-100 text-slate-700 text-xs">Injection</span>
+        </div>
+        <h2 class="text-2xl font-semibold">Challenges de formation</h2>
+        <p class="text-sm text-slate-600 mt-1">Comptes: alice / alice123 · bob / bob123 · admin / admin123</p>
+    </div>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold text-blue-700">Challenge 1 · Injection SQL</p>
+                <h3 class="text-lg font-semibold">Recherche catalogue public</h3>
+            </div>
+            <span class="text-amber-500">★★★☆☆</span>
+        </div>
+        <p class="text-sm text-slate-700">Connectez-vous en tant que alice et utilisez la recherche du catalogue. Trouvez un moyen de faire apparaître un produit privé.</p>
+        <details class="border rounded border-amber-200">
+            <summary class="cursor-pointer bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">Révéler l'indice</summary>
+            <div class="p-3 text-sm text-amber-900 space-y-1">
+                <p>Commencez par une recherche simple qui marche dans le parcours normal.</p>
+                <p>Testez ensuite des caractères qui modifient une condition SQL.</p>
+                <p>Observez si le filtre de visibilité reste réellement appliqué.</p>
+            </div>
+        </details>
+        <details class="border rounded border-green-200">
+            <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
+            <div class="p-3 text-sm text-green-900 space-y-3">
+                <p><strong>Payload local:</strong> <code>" OR 1=1 -- </code></p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
+$sql = 'SELECT id, name, description, price_cents
+        FROM product
+        WHERE is_public = 1
+        AND name LIKE "%'.$q.'%"';</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
+$sql = 'SELECT id, name, description, price_cents
+        FROM product
+        WHERE is_public = 1
+        AND name LIKE :query';
+$rows = $connection->executeQuery($sql, [
+    'query' => '%'.$query.'%',
+])->fetchAllAssociative();</code></pre>
+                <p class="text-xs">Principe OWASP: une donnée utilisateur doit rester une valeur, jamais une instruction SQL.</p>
+            </div>
+        </details>
+    </section>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold text-blue-700">Challenge 2 · Injection SQL</p>
+                <h3 class="text-lg font-semibold">Recherche interne globale</h3>
+            </div>
+            <span class="text-amber-500">★★★★☆</span>
+        </div>
+        <p class="text-sm text-slate-700">Connectez-vous en tant que bob et lancez une recherche interne standard. Trouvez un moyen de faire sortir des adresses email fictives depuis une autre table.</p>
+        <details class="border rounded border-amber-200">
+            <summary class="cursor-pointer bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">Révéler l'indice</summary>
+            <div class="p-3 text-sm text-amber-900 space-y-1">
+                <p>Regardez le format des colonnes affichées dans les résultats.</p>
+                <p>Essayez de produire une seconde requête compatible avec ce format.</p>
+                <p>Vérifiez si la base interprète votre texte comme de nouvelles instructions.</p>
+            </div>
+        </details>
+        <details class="border rounded border-green-200">
+            <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
+            <div class="p-3 text-sm text-green-900 space-y-3">
+                <p><strong>Payload local:</strong> <code>" UNION SELECT id, email, "user" FROM app_user -- </code></p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
+$sql = 'SELECT id, name, "product" AS type
+        FROM product
+        WHERE name LIKE "%'.$q.'%"';</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
+$sql = 'SELECT id, name, "product" AS type
+        FROM product
+        WHERE name LIKE :query';
+$rows = $connection->executeQuery($sql, [
+    'query' => '%'.$query.'%',
+])->fetchAllAssociative();</code></pre>
+                <p class="text-xs">Principe OWASP: une injection peut détourner une recherche et extraire des données d'autres tables.</p>
+            </div>
+        </details>
+    </section>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold text-blue-700">Challenge 3 · XSS stockée</p>
+                <h3 class="text-lg font-semibold">Commentaires clients</h3>
+            </div>
+            <span class="text-amber-500">★★★☆☆</span>
+        </div>
+        <p class="text-sm text-slate-700">Connectez-vous en tant que alice et ajoutez un commentaire client normal. Trouvez un moyen de faire exécuter un script lors de l'affichage de l'historique.</p>
+        <details class="border rounded border-amber-200">
+            <summary class="cursor-pointer bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">Révéler l'indice</summary>
+            <div class="p-3 text-sm text-amber-900 space-y-1">
+                <p>Soumettez une note qui contient une balise HTML simple.</p>
+                <p>Comparez ce qui est stocké et ce qui est interprété au rendu.</p>
+                <p>Demandez-vous si la vue traite la valeur comme texte ou comme HTML.</p>
+            </div>
+        </details>
+        <details class="border rounded border-green-200">
+            <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
+            <div class="p-3 text-sm text-green-900 space-y-3">
+                <p><strong>Payload local:</strong> <code>&lt;script&gt;alert("xss-demo")&lt;/script&gt;</code></p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>{# ❌ Vulnérable #}
+&#123;&#123; comment.content|raw &#125;&#125;</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>{# ✅ Corrigé #}
+&#123;&#123; comment.content &#125;&#125;</code></pre>
+                <p class="text-xs">Principe OWASP: une donnée utilisateur ne doit pas devenir du HTML exécutable.</p>
+            </div>
+        </details>
+    </section>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold text-blue-700">Challenge 4 · XSS contextuelle</p>
+                <h3 class="text-lg font-semibold">Préférence de filtre du tableau de bord</h3>
+            </div>
+            <span class="text-amber-500">★★★★☆</span>
+        </div>
+        <p class="text-sm text-slate-700">Connectez-vous en tant que admin et enregistrez un filtre de tableau de bord. Trouvez un moyen de détourner le script qui lit cette valeur.</p>
+        <details class="border rounded border-amber-200">
+            <summary class="cursor-pointer bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">Révéler l'indice</summary>
+            <div class="p-3 text-sm text-amber-900 space-y-1">
+                <p>Regardez où la donnée est injectée dans le HTML final.</p>
+                <p>Le contexte est-il un bloc texte HTML ou une chaîne JavaScript ?</p>
+                <p>Vérifiez le type d'échappement réellement appliqué dans la vue.</p>
+            </div>
+        </details>
+        <details class="border rounded border-green-200">
+            <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
+            <div class="p-3 text-sm text-green-900 space-y-3">
+                <p><strong>Payload local:</strong> <code>"; alert("xss-context"); //</code></p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>{# ❌ Vulnérable #}
+&lt;script&gt;
+window.currentFilter = "&#123;&#123; filter|raw &#125;&#125;";
+&lt;/script&gt;</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>{# ✅ Corrigé #}
+&lt;script&gt;
+window.currentFilter = "&#123;&#123; filter|e('js') &#125;&#125;";
+&lt;/script&gt;</code></pre>
+                <p class="text-xs">Principe OWASP: l'échappement doit être aligné sur le contexte d'interprétation.</p>
+            </div>
+        </details>
+    </section>
+</div>
+{% endblock %}

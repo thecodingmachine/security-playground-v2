@@ -1,7 +1,7 @@
-.PHONY: up down back clear-cache reset-db install-deps lint owasp-01 owasp-02 owasp-06 owasp-07 owasp-09
+.PHONY: up down back clear-cache reset-db install-deps lint owasp-01 owasp-02 owasp-04 owasp-05 owasp-06 owasp-07 owasp-08 owasp-09
 
 # Switch OWASP module: down, update volumes, up, install deps, reset database.
-owasp-01 owasp-02 owasp-06 owasp-07 owasp-09:
+owasp-01 owasp-02 owasp-04 owasp-05 owasp-06 owasp-07 owasp-08 owasp-09:
 	$(MAKE) down
 	@./scripts/switch-owasp.sh $(subst owasp-,,$@)
 	$(MAKE) up
