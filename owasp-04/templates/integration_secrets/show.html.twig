@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détail secret{% endblock %}
+
+{% block body %}
+<div class="bg-white border border-slate-200 rounded-lg p-6 space-y-4 max-w-3xl">
+    <div>
+        <h2 class="text-xl font-semibold">{{ secret.name }}</h2>
+        <p class="text-xs text-slate-500">{{ secret.createdAt|date('d/m/Y H:i') }}</p>
+    </div>
+
+    <div>
+        <p class="text-sm font-medium text-slate-700 mb-1">Valeur chiffrée stockée</p>
+        <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>{{ secret.encryptedValue }}</code></pre>
+    </div>
+
+    <p class="text-sm text-slate-600">Le mode diagnostic permet de valider qu'un secret stocké peut être relu par le connecteur.</p>
+
+    <form method="post" action="{{ path('integration_secret_decrypt', {id: secret.id}) }}">
+        <button type="submit" class="rounded bg-slate-900 text-white px-3 py-2 text-sm">Exécuter un test de lecture</button>
+    </form>
+
+    {% if decrypted_value is defined %}
+        <div>
+            <p class="text-sm font-medium text-slate-700 mb-1">Résultat de lecture</p>
+            <pre class="bg-emerald-950 text-emerald-100 p-3 rounded text-xs overflow-x-auto"><code>{{ decrypted_value }}</code></pre>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

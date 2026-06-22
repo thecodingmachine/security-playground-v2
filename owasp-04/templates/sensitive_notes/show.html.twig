@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détail note{% endblock %}
+
+{% block body %}
+<div class="bg-white border border-slate-200 rounded-lg p-6 space-y-4 max-w-3xl">
+    <div>
+        <h2 class="text-xl font-semibold">{{ note.title }}</h2>
+        <p class="text-xs text-slate-500">{{ note.createdAt|date('d/m/Y H:i') }}</p>
+    </div>
+
+    <div>
+        <p class="text-sm font-medium text-slate-700 mb-1">Valeur persistée en base</p>
+        <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>{{ note.encodedValue }}</code></pre>
+    </div>
+
+    <p class="text-sm text-slate-600">L'équipe support peut afficher la valeur brute pour diagnostic de synchronisation.</p>
+
+    <form method="post" action="{{ path('sensitive_note_decode', {id: note.id}) }}">
+        <button type="submit" class="rounded bg-slate-900 text-white px-3 py-2 text-sm">Afficher la valeur opérationnelle</button>
+    </form>
+
+    {% if decoded_value is defined %}
+        <div>
+            <p class="text-sm font-medium text-slate-700 mb-1">Valeur relue côté application</p>
+            <pre class="bg-emerald-950 text-emerald-100 p-3 rounded text-xs overflow-x-auto"><code>{{ decoded_value }}</code></pre>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

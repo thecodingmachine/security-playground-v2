@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}OWASP A04{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 text-slate-900 min-h-screen">
+<div class="min-h-screen flex">
+    <aside class="w-72 bg-slate-900 text-slate-100 p-6 space-y-6">
+        <div>
+            <p class="text-xs uppercase tracking-wider text-slate-400">CustomerOps Platform</p>
+            <h1 class="text-lg font-semibold">CipherTrust Console</h1>
+        </div>
+
+        <nav class="space-y-1 text-sm">
+            <a href="{{ path('dashboard') }}" class="block rounded px-3 py-2 hover:bg-slate-800">Tableau de bord</a>
+            <a href="{{ path('sensitive_note_index') }}" class="block rounded px-3 py-2 hover:bg-slate-800">Dossiers clients</a>
+            <a href="{{ path('integration_secret_index') }}" class="block rounded px-3 py-2 hover:bg-slate-800">Connecteurs externes</a>
+            <a href="{{ path('forgot_password') }}" class="block rounded px-3 py-2 hover:bg-slate-800">Support identités</a>
+            <a href="{{ path('lab_password_dump') }}" class="block rounded px-3 py-2 hover:bg-slate-800">Exports sécurité</a>
+            <a href="{{ path('challenges_index') }}" class="block rounded px-3 py-2 hover:bg-slate-800">Challenges</a>
+        </nav>
+
+        <form method="post" action="{{ path('logout') }}">
+            <button type="submit" class="w-full px-3 py-2 rounded bg-slate-800 hover:bg-slate-700 text-sm">Se déconnecter</button>
+        </form>
+    </aside>
+
+    <main class="flex-1 p-8">
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="mb-3 rounded border px-3 py-2 text-sm {{ type == 'error' ? 'border-red-300 bg-red-50 text-red-700' : 'border-emerald-300 bg-emerald-50 text-emerald-700' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+        {% block body %}{% endblock %}
+    </main>
+</div>
+</body>
+</html>
