@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de bord{% endblock %}
+
+{% block body %}
+<div class="space-y-6">
+    <div>
+        <h2 class="text-2xl font-semibold">Bienvenue {{ user.fullName }}</h2>
+        <p class="text-sm text-slate-600">Vue d'ensemble des rapports et factures du compte courant.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <section class="bg-white border border-slate-200 rounded-lg p-4">
+            <h3 class="font-semibold mb-3">Derniers rapports</h3>
+            <ul class="space-y-2 text-sm">
+                {% for report in reports %}
+                    <li class="flex items-center justify-between">
+                        <span>{{ report.title }}</span>
+                        <a href="{{ path('reports_show', {id: report.id}) }}" class="text-blue-600 hover:underline">Ouvrir</a>
+                    </li>
+                {% else %}
+                    <li class="text-slate-500">Aucun rapport.</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section class="bg-white border border-slate-200 rounded-lg p-4">
+            <h3 class="font-semibold mb-3">Factures</h3>
+            <ul class="space-y-2 text-sm">
+                {% for invoice in invoices %}
+                    <li class="flex items-center justify-between">
+                        <span>{{ invoice.reference }} · {{ invoice.status }}</span>
+                        <span>{{ (invoice.amountCents / 100)|number_format(2, ',', ' ') }} €</span>
+                    </li>
+                {% else %}
+                    <li class="text-slate-500">Aucune facture.</li>
+                {% endfor %}
+            </ul>
+        </section>
+    </div>
+</div>
+{% endblock %}

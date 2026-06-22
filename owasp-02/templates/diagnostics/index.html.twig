@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Diagnostics{% endblock %}
+
+{% block body %}
+<div class="bg-white border border-slate-200 rounded-lg p-6 space-y-4">
+    <div>
+        <h2 class="text-xl font-semibold">Diagnostics fichiers</h2>
+        <p class="text-sm text-slate-600">Vérifications utilisées par l'équipe exploitation pendant les incidents.</p>
+    </div>
+
+    <div class="border border-slate-100 rounded p-4 text-sm space-y-2">
+        <p class="font-medium text-slate-800">Checklist post-déploiement</p>
+        <p class="text-slate-600">1. Vérifier que la racine web cible uniquement le dossier public.</p>
+        <p class="text-slate-600">2. Vérifier qu'aucun fichier de configuration, backup ou dump n'est servi en HTTP.</p>
+        <p class="text-slate-600">3. Contrôler les chemins de test suivants depuis le navigateur pendant le diagnostic.</p>
+        <div class="flex flex-wrap gap-2 pt-1">
+            <span class="px-2 py-1 rounded bg-slate-100 text-slate-700">/.env</span>
+            <span class="px-2 py-1 rounded bg-slate-100 text-slate-700">/old.env</span>
+            <span class="px-2 py-1 rounded bg-slate-100 text-slate-700">/backup.sql</span>
+            <span class="px-2 py-1 rounded bg-slate-100 text-slate-700">/config.php.bak</span>
+        </div>
+    </div>
+</div>
+{% endblock %}

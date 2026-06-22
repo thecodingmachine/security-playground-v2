@@ -10,6 +10,7 @@ services:
         - --providers.docker
         - --providers.docker.exposedbydefault=false
         - --providers.file.filename=/etc/traefik/config.yml
+        # ⚠️ A02 challenge 3: dashboard/API Traefik exposés
         - --api.insecure=true
         - --entryPoints.web.address=:80
         - --entryPoints.websecure.address=:443
@@ -27,11 +28,16 @@ services:
           condition: service_healthy
       environment:
         # APACHE
-        APACHE_DOCUMENT_ROOT: public
+        # APACHE_DOCUMENT_ROOT: public
+        # ⚠️ A02 challenge 2: mauvaise racine web (activée via scripts/switch-owasp.sh pour le module 02)
+        APACHE_DOCUMENT_ROOT: .
         # LARAVEL SPECIFICS
         APP_NAME: ${APP_NAME}
-        APP_ENV: ${ENV}
-        APP_DEBUG: ${DEBUG}
+        # APP_ENV: ${ENV}
+        # APP_DEBUG: ${DEBUG}
+        # ⚠️ A02 challenge 1: mode debug Symfony activé (activé via scripts/switch-owasp.sh pour le module 02)
+        APP_ENV: dev
+        APP_DEBUG: 1
         APP_URL: ${HTTP_PROTOCOL}://${DOMAIN}
         APP_KEY: ${APP_KEY}
         APP_LOCALE: ${APP_LOCALE}
@@ -72,6 +78,9 @@ services:
         DB_USERNAME: ${DATABASE_USER}
         DB_PASSWORD: ${DATABASE_PASSWORD}
         DB_HOST: ${DATABASE_HOST}
+        # SYMFONY SPECIFICS
+        APP_SECRET: change-this-secret-for-training
+        DATABASE_URL: mysql://${DATABASE_USER}:${DATABASE_PASSWORD}@database:3306/${DATABASE_NAME}?serverVersion=8.4&charset=utf8mb4
         # EMAILING
         MAIL_MAILER: ${MAIL_MAILER}
         MAIL_SCHEME: ${MAIL_SCHEME}
@@ -87,7 +96,8 @@ services:
         - traefik.http.routers.backend.tls=true
       working_dir: /var/www/html
       volumes:
-        - ./owasp-01:/var/www/html
+        # - ./owasp-01:/var/www/html
+        - ./owasp-02:/var/www/html
         # - ./owasp-06:/var/www/html
         # - ./owasp-07:/var/www/html
         # - ./owasp-09:/var/www/html
@@ -95,8 +105,12 @@ services:
 
     database:
       image: ${HUB_PROXY}/mysql:8.4
+      # ⚠️ A02 challenge 4: MySQL exposé en dehors du réseau interne Docker
+      ports:
+        - 3306:3306
       volumes:
-        - database_owasp_01_volume:/var/lib/mysql
+        # - database_owasp_01_volume:/var/lib/mysql
+        - database_owasp_02_volume:/var/lib/mysql
         # - database_owasp_06_volume:/var/lib/mysql
         # - database_owasp_07_volume:/var/lib/mysql
         # - database_owasp_09_volume:/var/lib/mysql
@@ -120,6 +134,7 @@ services:
         PMA_USER: "root"
         PMA_PASSWORD: ${DATABASE_ROOT_PASSWORD}
       labels:
+        # ⚠️ A02 challenge 4: phpMyAdmin exposé publiquement via Traefik
         - traefik.enable=true
         - traefik.http.routers.database_administration.rule=Host(`pma.${DOMAIN}`)
         - traefik.http.routers.database_administration.tls=true
@@ -150,6 +165,7 @@ services:
 
 volumes:
     database_owasp_01_volume:
+    database_owasp_02_volume:
     database_owasp_06_volume:
     database_owasp_07_volume:
     database_owasp_09_volume:
