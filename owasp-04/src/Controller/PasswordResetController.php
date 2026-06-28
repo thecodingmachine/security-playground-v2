@@ -38,13 +38,13 @@ final class PasswordResetController extends AbstractController
             return $this->redirectToRoute('forgot_password');
         }
 
-        // ⚠️ VULNÉRABLE — Cryptographic Failure : token dérivé de données prévisibles, stocké en clair, expiration large.
-        $tokenValue = md5($user->getUsername().time());
+        // Token aléatoire pour éviter toute prédictibilité.
+        $tokenValue = bin2hex(random_bytes(32));
 
         $resetToken = (new PasswordResetToken())
             ->setUser($user)
             ->setToken($tokenValue)
-            ->setExpiresAt(new \DateTimeImmutable('+7 days'));
+            ->setExpiresAt(new \DateTimeImmutable('+15 minutes'));
 
         $entityManager->persist($resetToken);
         $entityManager->flush();

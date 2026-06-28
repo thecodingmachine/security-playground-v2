@@ -1,7 +1,7 @@
-.PHONY: up down back clear-cache reset-db install-deps lint owasp-01 owasp-02 owasp-04 owasp-05 owasp-06 owasp-07 owasp-08 owasp-09
+.PHONY: up down back clear-cache reset-db install-deps lint owasp-01 owasp-02 owasp-04 owasp-05 owasp-06 owasp-07 owasp-08 owasp-09 owasp-10
 
 # Switch OWASP module: down, update volumes, up, install deps, reset database.
-owasp-01 owasp-02 owasp-04 owasp-05 owasp-06 owasp-07 owasp-08 owasp-09:
+owasp-01 owasp-02 owasp-04 owasp-05 owasp-06 owasp-07 owasp-08 owasp-09 owasp-10:
 	$(MAKE) down
 	@./scripts/switch-owasp.sh $(subst owasp-,,$@)
 	$(MAKE) up
@@ -26,7 +26,7 @@ clear-cache:
 
 # Install PHP dependencies for the active OWASP module.
 install-deps:
-	docker compose exec -u root backend sh -lc 'composer install --no-interaction && if [ -d storage ]; then chown -R 1001:1001 vendor storage bootstrap/cache; else mkdir -p var && chown -R 1001:1001 vendor var; fi'
+	docker compose exec -u root backend sh -lc 'composer install --no-interaction && if [ -d storage ]; then chown -R 1000:1000 vendor storage bootstrap/cache; else mkdir -p var && chown -R 1000:1000 vendor var; fi'
 
 # Reset the database by running fresh migrations and seeding sample data.
 reset-db:

@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Commandes{% endblock %}
+
+{% block body %}
+<div class="space-y-6">
+    <div class="bg-white border border-slate-200 rounded-lg p-5">
+        <h2 class="text-2xl font-semibold">Commandes internes</h2>
+        <p class="text-sm text-slate-600 mt-1">Validation et confirmation des commandes clients.</p>
+    </div>
+
+    <section class="bg-white border border-slate-200 rounded-lg overflow-hidden">
+        <table class="min-w-full text-sm">
+            <thead class="bg-slate-50">
+            <tr>
+                <th class="text-left px-4 py-3 font-medium">Référence</th>
+                <th class="text-left px-4 py-3 font-medium">Montant</th>
+                <th class="text-left px-4 py-3 font-medium">Statut</th>
+                <th class="text-left px-4 py-3 font-medium">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for order in orders %}
+                <tr class="border-t border-slate-100">
+                    <td class="px-4 py-3">{{ order.reference }}</td>
+                    <td class="px-4 py-3">{{ (order.amountCents / 100)|number_format(2, ',', ' ') }} {{ order.currency }}</td>
+                    <td class="px-4 py-3">{{ order.status }}</td>
+                    <td class="px-4 py-3">
+                        <form method="post" action="{{ path('orders_confirm', {id: order.id}) }}" class="inline-flex items-center gap-2">
+                            <label class="inline-flex items-center gap-1 text-xs text-slate-600">
+                                <input type="checkbox" name="simulate_failure" value="1" class="rounded border-slate-300">
+                                Simuler échec
+                            </label>
+                            <button class="rounded bg-slate-900 text-white px-3 py-1.5 text-xs" type="submit">Confirmer</button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4" class="px-4 py-4 text-slate-500">Aucune commande.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</div>
+{% endblock %}

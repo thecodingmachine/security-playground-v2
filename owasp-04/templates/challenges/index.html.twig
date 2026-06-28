@@ -99,44 +99,6 @@ $encryptedValue = $cryptoService->encrypt($value, $_ENV['APP_DATA_ENCRYPTION_KEY
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold text-blue-700">Challenge 3 · Cryptographic Failure</p>
-                <h3 class="text-lg font-semibold">Lien de récupération prévisible</h3>
-            </div>
-            <span class="text-amber-500">★★★★☆</span>
-        </div>
-        <p class="text-sm text-slate-700">Connectez-vous en tant que alice et traitez deux demandes de perte d'accès rapprochées. Trouvez un moyen d'anticiper la structure des liens de récupération.</p>
-        <details class="border rounded border-amber-200">
-            <summary class="cursor-pointer bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">Révéler l'indice</summary>
-            <div class="p-3 text-sm text-amber-900 space-y-1">
-                <p>Observez les tokens générés à quelques secondes d'intervalle.</p>
-                <p>Regardez la formule de génération côté serveur.</p>
-                <p>Vérifiez la durée de validité et la gestion de réutilisation.</p>
-            </div>
-        </details>
-        <details class="border rounded border-green-200">
-            <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
-            <div class="p-3 text-sm text-green-900 space-y-3">
-                <p><strong>Payload :</strong> soumettre plusieurs demandes sur <code>/forgot-password</code>, comparer les tokens puis ouvrir <code>/reset-password/{token}</code>.</p>
-                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
-// src/Controller/PasswordResetController.php
-$tokenValue = md5($user->getUsername().time());
-$resetToken->setToken($tokenValue)->setExpiresAt(new DateTimeImmutable('+7 days'));</code></pre>
-                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
-$rawToken = bin2hex(random_bytes(32));
-$tokenHash = hash('sha256', $rawToken);
-$resetToken->setTokenHash($tokenHash)->setExpiresAt(new DateTimeImmutable('+15 minutes'));
-
-if (!hash_equals($storedHash, hash('sha256', $providedToken))) {
-    throw new AccessDeniedHttpException();
-}</code></pre>
-                <p class="text-xs">Principe OWASP : un token de sécurité doit être imprévisible, court en durée, non stocké en clair et invalide après usage.</p>
-            </div>
-        </details>
-    </section>
-
-    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
-        <div class="flex items-start justify-between">
-            <div>
-                <p class="text-xs font-semibold text-blue-700">Challenge 4 · Cryptographic Failure</p>
                 <h3 class="text-lg font-semibold">Connecteur avec clé hardcodée</h3>
             </div>
             <span class="text-amber-500">★★★★☆</span>

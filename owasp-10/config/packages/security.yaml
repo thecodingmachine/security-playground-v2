@@ -1,0 +1,32 @@
+security:
+    password_hashers:
+        App\Entity\User:
+            algorithm: auto
+
+    providers:
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: username
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        main:
+            lazy: true
+            provider: app_user_provider
+            form_login:
+                login_path: login
+                check_path: login
+                default_target_path: dashboard
+                enable_csrf: true
+            logout:
+                path: logout
+                target: login
+
+    access_control:
+        - { path: ^/login$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/internal, roles: ROLE_USER }
+        - { path: ^/, roles: ROLE_USER }

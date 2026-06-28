@@ -1,0 +1,187 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Challenges A10{% endblock %}
+
+{% block body %}
+<div class="space-y-6">
+    <div class="bg-white border border-slate-200 rounded-lg p-5">
+        <div class="flex items-center gap-2 mb-2">
+            <span class="px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-semibold">OWASP A10:2021</span>
+            <span class="px-2 py-1 rounded bg-slate-100 text-slate-700 text-xs">Mishandling of Exceptional Conditions</span>
+        </div>
+        <h2 class="text-2xl font-semibold">Challenges de formation</h2>
+        <p class="text-sm text-slate-600 mt-1">Comptes: alice / alice123 · bob / bob123 · admin / admin123</p>
+    </div>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <p class="text-xs font-semibold text-blue-700">Challenge 1 · Mishandling of Exceptional Conditions</p>
+                <h3 class="text-lg font-semibold">Contrôle admin catché puis ignoré</h3>
+            </div>
+            <span class="text-amber-500">★★★☆☆</span>
+        </div>
+        <p class="text-sm text-slate-700">Connectez-vous en tant que alice et ouvrez la page des utilisateurs du back-office. Trouvez un moyen de consulter la liste complète.</p>
+        <details class="border rounded border-amber-200">
+            <summary class="cursor-pointer bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">Révéler l'indice</summary>
+            <div class="p-3 text-sm text-amber-900 space-y-1">
+                <p>Testez la même route avec un compte standard puis avec admin.</p>
+                <p>Comparez la réponse HTTP et ce qui est réellement affiché.</p>
+                <p>Cherchez un bloc try/catch autour d'un contrôle d'accès.</p>
+            </div>
+        </details>
+        <details class="border rounded border-green-200">
+            <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
+            <div class="p-3 text-sm text-green-900 space-y-3">
+                <p><strong>Exploit local:</strong> compte alice, puis GET <code>/admin/users</code>.</p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
+try {
+    $this-&gt;denyAccessUnlessGranted('ROLE_ADMIN');
+} catch (\Throwable $exception) {
+    $logger-&gt;warning('Admin access check failed, continuing anyway');
+}
+$users = $userRepository-&gt;findAll();</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
+#[IsGranted('ROLE_ADMIN')]
+public function users(UserRepository $userRepository): Response
+{
+    $users = $userRepository-&gt;findAll();
+
+    return $this-&gt;render('admin/users.html.twig', ['users' =&gt; $users]);
+}</code></pre>
+                <p class="text-xs">Principe OWASP: une erreur d'autorisation doit bloquer l'action et produire un refus explicite.</p>
+            </div>
+        </details>
+    </section>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <p class="text-xs font-semibold text-blue-700">Challenge 2 · Mishandling of Exceptional Conditions</p>
+                <h3 class="text-lg font-semibold">Fallback permissif sur l'export sensible</h3>
+            </div>
+            <span class="text-amber-500">★★★★☆</span>
+        </div>
+        <p class="text-sm text-slate-700">Connectez-vous en tant que bob et lancez un export finance standard. Trouvez un moyen d'obtenir le fichier quand la vérification de permission échoue.</p>
+        <details class="border rounded border-amber-200">
+            <summary class="cursor-pointer bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">Révéler l'indice</summary>
+            <div class="p-3 text-sm text-amber-900 space-y-1">
+                <p>Identifiez le service qui décide si l'utilisateur peut exporter.</p>
+                <p>Provoquez une erreur dans ce service puis regardez la valeur de secours.</p>
+                <p>Vérifiez si l'incertitude donne un refus ou une autorisation.</p>
+            </div>
+        </details>
+        <details class="border rounded border-green-200">
+            <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
+            <div class="p-3 text-sm text-green-900 space-y-3">
+                <p><strong>Exploit local:</strong> compte bob, puis GET <code>/finance/export?download=1&amp;simulate_failure=1</code>.</p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
+try {
+    $canExport = $permissionChecker-&gt;canExportSensitiveData($currentUser);
+} catch (\Throwable $exception) {
+    $logger-&gt;warning('Permission check failed, allowing export by fallback');
+    $canExport = true;
+}</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
+try {
+    $canExport = $permissionChecker-&gt;canExportSensitiveData($currentUser);
+} catch (\Throwable $exception) {
+    $logger-&gt;error('Permission check failed', ['exception' =&gt; $exception]);
+    throw $this-&gt;createAccessDeniedException();
+}</code></pre>
+                <p class="text-xs">Principe OWASP: un contrôle de sécurité doit échouer fermé quand la vérification est incertaine.</p>
+            </div>
+        </details>
+    </section>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <p class="text-xs font-semibold text-blue-700">Challenge 3 · Mishandling of Exceptional Conditions</p>
+                <h3 class="text-lg font-semibold">Confirmation de commande incohérente</h3>
+            </div>
+            <span class="text-amber-500">★★★★☆</span>
+        </div>
+        <p class="text-sm text-slate-700">Connectez-vous en tant que alice et confirmez la commande ORDER-2026-0001. Trouvez un moyen de garder un succès apparent alors qu'une étape critique échoue.</p>
+        <details class="border rounded border-amber-200">
+            <summary class="cursor-pointer bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">Révéler l'indice</summary>
+            <div class="p-3 text-sm text-amber-900 space-y-1">
+                <p>Déclenchez une erreur pendant la validation de paiement.</p>
+                <p>Comparez le statut retourné et l'état stocké en base.</p>
+                <p>Cherchez si la confirmation est atomique ou non.</p>
+            </div>
+        </details>
+        <details class="border rounded border-green-200">
+            <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
+            <div class="p-3 text-sm text-green-900 space-y-3">
+                <p><strong>Exploit local:</strong> POST <code>/orders/1/confirm</code> avec <code>simulate_failure=1</code>.</p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
+$order-&gt;markAsConfirmed();
+$entityManager-&gt;persist($invoice);
+$entityManager-&gt;flush();
+try {
+    $paymentValidator-&gt;validatePayment($order);
+} catch (\Throwable $exception) {
+    $logger-&gt;warning('Payment validation failed, but order is already confirmed');
+}
+return new JsonResponse(['success' =&gt; true]);</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
+try {
+    $entityManager-&gt;wrapInTransaction(function () use ($order, $paymentValidator, $entityManager): void {
+        $paymentValidator-&gt;validatePayment($order);
+        $order-&gt;markAsConfirmed();
+        $entityManager-&gt;persist($invoice);
+    });
+} catch (\Throwable $exception) {
+    return new JsonResponse(['success' =&gt; false], Response::HTTP_CONFLICT);
+}</code></pre>
+                <p class="text-xs">Principe OWASP: un traitement critique doit rester cohérent, atomique et échouer proprement.</p>
+            </div>
+        </details>
+    </section>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <p class="text-xs font-semibold text-blue-700">Challenge 4 · Mishandling of Exceptional Conditions</p>
+                <h3 class="text-lg font-semibold">Détails techniques exposés dans l'export</h3>
+            </div>
+            <span class="text-amber-500">★★★☆☆</span>
+        </div>
+        <p class="text-sm text-slate-700">Connectez-vous en tant que admin et exportez un rapport standard. Trouvez un moyen de récupérer des informations internes via une erreur applicative.</p>
+        <details class="border rounded border-amber-200">
+            <summary class="cursor-pointer bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">Révéler l'indice</summary>
+            <div class="p-3 text-sm text-amber-900 space-y-1">
+                <p>Déclenchez une erreur de génération puis inspectez la réponse complète.</p>
+                <p>Repérez les champs qui décrivent les classes, chemins et lignes internes.</p>
+                <p>Vérifiez si les détails restent côté logs serveur ou côté client.</p>
+            </div>
+        </details>
+        <details class="border rounded border-green-200">
+            <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
+            <div class="p-3 text-sm text-green-900 space-y-3">
+                <p><strong>Exploit local:</strong> GET <code>/reports/3/export</code>.</p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
+catch (\Throwable $exception) {
+    return new JsonResponse([
+        'error' =&gt; $exception-&gt;getMessage(),
+        'file' =&gt; $exception-&gt;getFile(),
+        'line' =&gt; $exception-&gt;getLine(),
+        'trace' =&gt; $exception-&gt;getTraceAsString(),
+    ], 500);
+}</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
+catch (\Throwable $exception) {
+    $logger-&gt;error('Report generation failed', ['exception' =&gt; $exception]);
+
+    return new JsonResponse([
+        'success' =&gt; false,
+        'message' =&gt; 'Le rapport ne peut pas être généré pour le moment.',
+    ], 500);
+}</code></pre>
+                <p class="text-xs">Principe OWASP: les détails techniques d'exception doivent rester dans les logs serveur et jamais dans la réponse client.</p>
+            </div>
+        </details>
+    </section>
+</div>
+{% endblock %}

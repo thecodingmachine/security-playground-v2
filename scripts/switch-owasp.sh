@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-OWASP="${1:?Usage: $0 <01|02|04|05|06|07|08|09>}"
+OWASP="${1:?Usage: $0 <01|02|04|05|06|07|08|09|10>}"
 COMPOSE_FILE="${2:-docker-compose.yml}"
 
 case "$OWASP" in
-    01|02|04|05|06|07|08|09) ;;
+    01|02|04|05|06|07|08|09|10) ;;
     *)
-        echo "Invalid OWASP module: $OWASP (expected 01, 02, 04, 05, 06, 07, 08 or 09)" >&2
+        echo "Invalid OWASP module: $OWASP (expected 01, 02, 04, 05, 06, 07, 08, 09 or 10)" >&2
         exit 1
         ;;
 esac
 
-for id in 01 02 04 05 06 07 08 09; do
+for id in 01 02 04 05 06 07 08 09 10; do
     if [[ "$id" == "$OWASP" ]]; then
         sed -i "s|^        # - ./owasp-${id}:/var/www/html|        - ./owasp-${id}:/var/www/html|" "$COMPOSE_FILE"
         sed -i "s|^        # - database_owasp_${id}_volume:/var/lib/mysql|        - database_owasp_${id}_volume:/var/lib/mysql|" "$COMPOSE_FILE"

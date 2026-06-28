@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de bord{% endblock %}
+
+{% block body %}
+<div class="space-y-6">
+    <div class="bg-white border border-slate-200 rounded-lg p-5">
+        <h2 class="text-2xl font-semibold">Tableau de bord opérations</h2>
+        <p class="text-sm text-slate-600 mt-1">Bienvenue {{ current_user.fullName }}. Consultez vos accès, commandes et exports.</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-4">
+        <article class="bg-white border border-slate-200 rounded-lg p-4">
+            <p class="text-sm text-slate-600">Commandes actives</p>
+            <p class="text-xl font-semibold mt-1">{{ order_count }}</p>
+        </article>
+        <article class="bg-white border border-slate-200 rounded-lg p-4">
+            <p class="text-sm text-slate-600">Factures émises</p>
+            <p class="text-xl font-semibold mt-1">{{ invoice_count }}</p>
+        </article>
+        <article class="bg-white border border-slate-200 rounded-lg p-4">
+            <p class="text-sm text-slate-600">Rapports disponibles</p>
+            <p class="text-xl font-semibold mt-1">{{ report_count }}</p>
+        </article>
+    </div>
+</div>
+{% endblock %}
