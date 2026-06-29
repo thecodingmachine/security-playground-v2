@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Retour paiement{% endblock %}
+
+{% block body %}
+<div class="space-y-6">
+    <section class="bg-white border border-slate-200 rounded-lg p-5">
+        <h2 class="text-xl font-semibold">Retour de paiement</h2>
+        <p class="text-sm text-slate-600 mt-1">Commande {{ order.reference }}.</p>
+        <dl class="mt-4 grid md:grid-cols-3 gap-4 text-sm">
+            <div>
+                <dt class="text-slate-500">Statut reçu</dt>
+                <dd class="font-medium">{{ status }}</dd>
+            </div>
+            <div>
+                <dt class="text-slate-500">Montant reçu</dt>
+                <dd class="font-medium">{{ (amount_cents / 100)|number_format(2, ',', ' ') }} {{ currency }}</dd>
+            </div>
+            <div>
+                <dt class="text-slate-500">Statut commande</dt>
+                <dd class="font-medium">{{ order.status }}</dd>
+            </div>
+        </dl>
+        <a class="inline-block mt-4 rounded border border-slate-300 px-4 py-2 text-sm" href="{{ path('orders_show', {id: order.id}) }}">Retour commande</a>
+    </section>
+</div>
+{% endblock %}
+

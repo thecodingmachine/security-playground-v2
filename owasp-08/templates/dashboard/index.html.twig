@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de bord{% endblock %}
+
+{% block body %}
+<div class="space-y-6">
+    <div class="bg-white border border-slate-200 rounded-lg p-5">
+        <h2 class="text-2xl font-semibold">Opérations paiement</h2>
+        <p class="text-sm text-slate-600 mt-1">Bienvenue {{ current_user.fullName }}. Suivez les commandes, retours de paiement et imports catalogue.</p>
+    </div>
+
+    <div class="grid md:grid-cols-4 gap-4">
+        <article class="bg-white border border-slate-200 rounded-lg p-4">
+            <p class="text-sm text-slate-600">Commandes en attente</p>
+            <p class="text-xl font-semibold mt-1">{{ pending_orders }}</p>
+        </article>
+        <article class="bg-white border border-slate-200 rounded-lg p-4">
+            <p class="text-sm text-slate-600">Commandes payées</p>
+            <p class="text-xl font-semibold mt-1">{{ paid_orders }}</p>
+        </article>
+        <article class="bg-white border border-slate-200 rounded-lg p-4">
+            <p class="text-sm text-slate-600">Produits catalogue</p>
+            <p class="text-xl font-semibold mt-1">{{ catalog_products_count }}</p>
+        </article>
+        <article class="bg-white border border-slate-200 rounded-lg p-4">
+            <p class="text-sm text-slate-600">Imports réalisés</p>
+            <p class="text-xl font-semibold mt-1">{{ catalog_imports_count }}</p>
+        </article>
+    </div>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5">
+        <div class="flex items-center justify-between">
+            <h3 class="font-semibold">Dernières commandes</h3>
+            <a href="{{ path('orders_index') }}" class="text-sm text-slate-700 hover:underline">Voir tout</a>
+        </div>
+        <div class="mt-4 overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                <tr class="text-left text-slate-500 border-b border-slate-200">
+                    <th class="py-2 pr-4">Référence</th>
+                    <th class="py-2 pr-4">Statut</th>
+                    <th class="py-2 pr-4">Montant</th>
+                    <th class="py-2 pr-4">Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for order in orders %}
+                    <tr class="border-b border-slate-100">
+                        <td class="py-2 pr-4 font-medium">{{ order.reference }}</td>
+                        <td class="py-2 pr-4">{{ order.status }}</td>
+                        <td class="py-2 pr-4">{{ (order.amountCents / 100)|number_format(2, ',', ' ') }} {{ order.currency }}</td>
+                        <td class="py-2 pr-4">
+                            <a class="text-slate-700 hover:underline" href="{{ path('orders_show', {id: order.id}) }}">Détail</a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="py-3 text-slate-500">Aucune commande.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}

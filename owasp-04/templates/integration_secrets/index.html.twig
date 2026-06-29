@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Secrets intégration{% endblock %}
+
+{% block body %}
+<div class="space-y-6">
+    <section class="bg-white border border-slate-200 rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-1">Connecteurs partenaires</h2>
+        <p class="text-sm text-slate-600 mb-4">Stocker un secret fictif pour synchroniser les données avec un service externe.</p>
+        <form method="post" action="{{ path('integration_secret_store') }}" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <input name="name" type="text" required placeholder="Nom du connecteur" class="rounded border border-slate-300 px-3 py-2 text-sm">
+            <input name="value" type="text" required placeholder="Secret fictif" class="rounded border border-slate-300 px-3 py-2 text-sm md:col-span-2">
+            <button type="submit" class="rounded bg-slate-900 text-white px-4 py-2 text-sm w-fit">Provisionner</button>
+        </form>
+    </section>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-6">
+        <h3 class="font-semibold mb-3">Connecteurs enregistrés</h3>
+        <table class="w-full text-sm">
+            <thead>
+            <tr class="text-left border-b">
+                <th class="py-2">Nom</th>
+                <th class="py-2">Créé le</th>
+                <th class="py-2 text-right"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for secret in secrets %}
+                <tr class="border-b border-slate-100">
+                    <td class="py-2">{{ secret.name }}</td>
+                    <td class="py-2">{{ secret.createdAt|date('d/m/Y H:i') }}</td>
+                    <td class="py-2 text-right">
+                        <a href="{{ path('integration_secret_show', {id: secret.id}) }}" class="text-blue-600 hover:underline">Voir détail</a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="3" class="py-3 text-slate-500">Aucun secret.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</div>
+{% endblock %}

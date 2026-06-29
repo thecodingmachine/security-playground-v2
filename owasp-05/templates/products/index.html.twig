@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Catalogue produits{% endblock %}
+
+{% block body %}
+<div class="space-y-6">
+    <div class="bg-white border border-slate-200 rounded-lg p-5">
+        <h2 class="text-2xl font-semibold">Catalogue public</h2>
+        <p class="text-sm text-slate-600 mt-1">Recherche rapide dans les offres diffusées aux partenaires.</p>
+    </div>
+
+    <form method="get" class="bg-white border border-slate-200 rounded-lg p-5 space-y-3">
+        <label for="q" class="text-sm font-medium">Rechercher un produit</label>
+        <div class="flex gap-2">
+            <input id="q" name="q" value="{{ query }}" class="flex-1 rounded border border-slate-300 px-3 py-2 text-sm" placeholder="Ex: phone">
+            <button type="submit" class="rounded bg-slate-900 text-white px-4 py-2 text-sm">Rechercher</button>
+        </div>
+    </form>
+
+    <section class="bg-white border border-slate-200 rounded-lg overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-slate-50 text-left">
+            <tr>
+                <th class="px-4 py-3">Produit</th>
+                <th class="px-4 py-3">Description</th>
+                <th class="px-4 py-3">Prix</th>
+                <th class="px-4 py-3">Visibilité</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for product in products %}
+                <tr class="border-t border-slate-200">
+                    <td class="px-4 py-3 font-medium">{{ product.name }}</td>
+                    <td class="px-4 py-3 text-slate-600">{{ product.description }}</td>
+                    <td class="px-4 py-3">{{ (product.price_cents / 100)|number_format(2, ',', ' ') }} EUR</td>
+                    <td class="px-4 py-3">
+                        {% if product.is_public %}
+                            <span class="text-green-700">Public</span>
+                        {% else %}
+                            <span class="text-red-700">Privé</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4" class="px-4 py-6 text-center text-slate-500">Aucun produit trouvé.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</div>
+{% endblock %}

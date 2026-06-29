@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Clients{% endblock %}
+
+{% block body %}
+<div class="space-y-6">
+    <div class="bg-white border border-slate-200 rounded-lg p-5">
+        <h2 class="text-2xl font-semibold">Comptes clients</h2>
+        <p class="text-sm text-slate-600 mt-1">Ouvrez un compte pour consulter et ajouter des commentaires support.</p>
+    </div>
+
+    <section class="bg-white border border-slate-200 rounded-lg overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-slate-50 text-left">
+            <tr>
+                <th class="px-4 py-3">Entreprise</th>
+                <th class="px-4 py-3">Contact</th>
+                <th class="px-4 py-3"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for customer in customers %}
+                <tr class="border-t border-slate-200">
+                    <td class="px-4 py-3 font-medium">{{ customer.company }}</td>
+                    <td class="px-4 py-3 text-slate-600">{{ customer.name }}</td>
+                    <td class="px-4 py-3 text-right">
+                        <a href="{{ path('customer_comments_index', {id: customer.id}) }}" class="rounded border border-slate-300 px-3 py-2 text-xs hover:bg-slate-100">
+                            Voir les commentaires
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</div>
+{% endblock %}

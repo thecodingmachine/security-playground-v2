@@ -1,0 +1,135 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Challenges A04{% endblock %}
+
+{% block body %}
+<div class="space-y-8">
+    <div>
+        <div class="flex items-center gap-2 mb-2">
+            <span class="px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-semibold">OWASP A04:2021</span>
+            <span class="px-2 py-1 rounded bg-slate-100 text-slate-700 text-xs">Cryptographic Failures</span>
+        </div>
+        <h2 class="text-2xl font-semibold">Parcours CipherTrust Console</h2>
+        <p class="text-sm text-slate-600 mt-2">Application métier de CustomerOps pour gérer des accès internes, des dossiers sensibles et des connecteurs partenaires.</p>
+    </div>
+
+    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm">
+        <p class="font-semibold text-amber-900 mb-1">Comptes de formation</p>
+        <p class="text-amber-800">alice / password · bob / azerty · admin / admin123</p>
+    </div>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold text-blue-700">Challenge 1 · Cryptographic Failure</p>
+                <h3 class="text-lg font-semibold">Onboarding opérateur et hash MD5</h3>
+            </div>
+            <span class="text-amber-500">★★★☆☆</span>
+        </div>
+        <p class="text-sm text-slate-700">Connectez-vous en tant que alice et créez un nouvel opérateur depuis l'onboarding. Trouvez un moyen de retrouver rapidement le mot de passe depuis un export de sécurité.</p>
+        <details class="border rounded border-amber-200">
+            <summary class="cursor-pointer bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">Révéler l'indice</summary>
+            <div class="p-3 text-sm text-amber-900 space-y-1">
+                <p>Consultez la section exports sécurité.</p>
+                <p>Le hash observé ressemble-t-il à un algorithme lent moderne ?</p>
+                <p>Comparez les hashes avec la liste locale de mots de passe faibles.</p>
+            </div>
+        </details>
+        <details class="border rounded border-green-200">
+            <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
+            <div class="p-3 text-sm text-green-900 space-y-3">
+                <p><strong>Payload :</strong> ouvrir <code>/lab/password-dump</code>, calculer MD5 sur le dictionnaire local et comparer.</p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
+// src/Controller/PasswordLabController.php
+$user->setPassword(md5($plainPassword));
+
+// src/Security/LoginFormAuthenticator.php
+return md5($plainPassword) === $user->getPassword();</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
+// config/packages/security.yaml
+password_hashers:
+  App\Entity\User:
+    algorithm: auto
+
+// Inscription
+$user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
+
+// Connexion
+$passwordHasher->isPasswordValid($user, $plainPassword);</code></pre>
+                <p class="text-xs">Principe OWASP : un mot de passe doit être haché avec un algorithme lent, salé et dédié aux mots de passe.</p>
+            </div>
+        </details>
+    </section>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold text-blue-700">Challenge 2 · Cryptographic Failure</p>
+                <h3 class="text-lg font-semibold">Dossiers clients stockés en Base64</h3>
+            </div>
+            <span class="text-amber-500">★★☆☆☆</span>
+        </div>
+        <p class="text-sm text-slate-700">Connectez-vous en tant que bob et ajoutez une donnée réglementaire dans un dossier client. Trouvez un moyen de relire la valeur sans clé de chiffrement.</p>
+        <details class="border rounded border-amber-200">
+            <summary class="cursor-pointer bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">Révéler l'indice</summary>
+            <div class="p-3 text-sm text-amber-900 space-y-1">
+                <p>La valeur affichée en base est-elle du chiffrement ou un simple encodage ?</p>
+                <p>L'application dispose d'un mode de lecture opérationnelle.</p>
+                <p>Distinguez encodage, hash et chiffrement.</p>
+            </div>
+        </details>
+        <details class="border rounded border-green-200">
+            <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
+            <div class="p-3 text-sm text-green-900 space-y-3">
+                <p><strong>Payload :</strong> créer une entrée puis ouvrir <code>/sensitive-notes/{id}</code> et lancer l'affichage opérationnel.</p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
+// src/Controller/SensitiveNoteController.php
+$note->setEncodedValue(base64_encode($value));
+$decoded = base64_decode($note->getEncodedValue(), true);</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
+// Option 1: ne pas stocker si inutile
+// Option 2: chiffrement avec secret hors code
+$encryptedValue = $cryptoService->encrypt($value, $_ENV['APP_DATA_ENCRYPTION_KEY']);</code></pre>
+                <p class="text-xs">Principe OWASP : Base64 est un encodage réversible, pas un mécanisme de protection cryptographique.</p>
+            </div>
+        </details>
+    </section>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold text-blue-700">Challenge 3 · Cryptographic Failure</p>
+                <h3 class="text-lg font-semibold">Connecteur avec clé hardcodée</h3>
+            </div>
+            <span class="text-amber-500">★★★★☆</span>
+        </div>
+        <p class="text-sm text-slate-700">Connectez-vous en tant que admin et provisionnez un connecteur externe. Trouvez un moyen de relire la donnée claire en récupérant la clé dans le code.</p>
+        <details class="border rounded border-amber-200">
+            <summary class="cursor-pointer bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">Révéler l'indice</summary>
+            <div class="p-3 text-sm text-amber-900 space-y-1">
+                <p>Localisez la clé utilisée pour chiffrer puis relire le secret.</p>
+                <p>Regardez si la clé est commune à tous les environnements.</p>
+                <p>Vérifiez si la clé est versionnée avec le code source.</p>
+            </div>
+        </details>
+        <details class="border rounded border-green-200">
+            <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
+            <div class="p-3 text-sm text-green-900 space-y-3">
+                <p><strong>Payload :</strong> créer un connecteur puis ouvrir <code>/integration-secrets/{id}</code> et exécuter le test de lecture.</p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
+// src/Controller/IntegrationSecretController.php
+$secretKey = 'default_key';
+$iv = substr(hash('sha256', $secretKey, true), 0, 16);
+$encrypted = openssl_encrypt($value, 'aes-256-cbc', $secretKey, 0, $iv);</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
+// secret stocké hors code (vault, variable d'environnement sécurisée, Symfony Secrets)
+$secretKey = $_ENV['APP_DATA_ENCRYPTION_KEY'];
+$encrypted = $cryptoService->encrypt($value, $secretKey);
+
+// clés différentes par environnement + rotation planifiée</code></pre>
+                <p class="text-xs">Principe OWASP : une clé exposée annule la protection apportée par le chiffrement.</p>
+            </div>
+        </details>
+    </section>
+</div>
+{% endblock %}

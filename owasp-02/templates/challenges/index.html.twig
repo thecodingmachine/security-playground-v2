@@ -1,0 +1,210 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Challenges A02{% endblock %}
+
+{% block body %}
+<div class="space-y-6">
+    <div>
+        <div class="flex items-center gap-2 mb-2">
+            <span class="px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-semibold">OWASP A02:2021</span>
+            <span class="px-2 py-1 rounded bg-slate-100 text-slate-700 text-xs">Security Misconfiguration</span>
+        </div>
+        <h2 class="text-2xl font-semibold">Challenges de configuration</h2>
+    </div>
+
+    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm">
+        <p class="font-semibold text-amber-900 mb-1">Comptes de formation</p>
+        <p class="text-amber-800">alice / alice123 · bob / bob123 · admin / admin123</p>
+    </div>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold text-blue-700">Challenge 1 · Security Misconfiguration</p>
+                <h3 class="text-lg font-semibold">Debug Symfony et profiler exposés</h3>
+            </div>
+            <span class="text-amber-500">★★☆☆☆</span>
+        </div>
+        <p class="text-sm text-slate-700">Connectez-vous en tant que alice et consultez les rapports du mois. Trouvez un moyen de récupérer des informations techniques internes.</p>
+        <details class="border rounded border-amber-200">
+            <summary class="cursor-pointer bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">Révéler l'indice</summary>
+            <div class="p-3 text-sm text-amber-900 space-y-1">
+                <p>Que voyez-vous quand une ressource demandée n'existe pas ?</p>
+                <p>La réponse révèle-t-elle des chemins, classes ou requêtes ?</p>
+                <p>Existe-t-il des routes techniques accessibles après l'erreur ?</p>
+            </div>
+        </details>
+        <details class="border rounded border-green-200">
+            <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution et correction</summary>
+            <div class="p-3 text-sm text-green-900 space-y-3">
+                <p><strong>Payload :</strong> ouvrir <code>/reports/99999</code> puis consulter <code>/_profiler</code>.</p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code># Résultat observé
+Stack trace + contrôleur appelé + chemins de fichiers + requêtes Doctrine</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code># ❌ Vulnérable
+APP_ENV=dev
+APP_DEBUG=1
+
+# ✅ Corrigé
+APP_ENV=prod
+APP_DEBUG=0</code></pre>
+                <p class="text-xs">Principe OWASP : les outils de debug doivent rester strictement hors production.</p>
+            </div>
+        </details>
+    </section>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold text-blue-700">Challenge 2 · Security Misconfiguration</p>
+                <h3 class="text-lg font-semibold">Fichier sensible servi publiquement</h3>
+            </div>
+            <span class="text-amber-500">★★★☆☆</span>
+        </div>
+        <p class="text-sm text-slate-700">Connectez-vous en tant que alice et utilisez la page Diagnostics. Trouvez un moyen de lire un fichier de configuration sensible depuis le navigateur.</p>
+        <details class="border rounded border-amber-200">
+            <summary class="cursor-pointer bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">Révéler l'indice</summary>
+            <div class="p-3 text-sm text-amber-900 space-y-1">
+                <p>Le serveur web sert-il uniquement le dossier public ?</p>
+                <p>Quels noms de fichiers de configuration sont souvent oubliés ?</p>
+                <p>Que renvoie une requête directe vers un fichier caché courant ?</p>
+            </div>
+        </details>
+        <details class="border rounded border-green-200">
+            <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution et correction</summary>
+            <div class="p-3 text-sm text-green-900 space-y-3">
+                <p><strong>Payload :</strong> ouvrir <code>/.env</code>, <code>/old.env</code> ou <code>/backup.sql</code>.</p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code># Résultat observé
+Variables d'environnement lisibles en HTTP (secrets fictifs de formation)</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code># ❌ Vulnérable
+backend:
+  environment:
+    APACHE_DOCUMENT_ROOT: .
+
+# ✅ Corrigé
+backend:
+  environment:
+    APACHE_DOCUMENT_ROOT: public</code></pre>
+                <p class="text-xs">Principe OWASP : aucun secret ne doit être accessible via HTTP.</p>
+            </div>
+        </details>
+    </section>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold text-blue-700">Challenge 3 · Security Misconfiguration</p>
+                <h3 class="text-lg font-semibold">Dashboard Traefik exposé</h3>
+            </div>
+            <span class="text-amber-500">★★★☆☆</span>
+        </div>
+        <p class="text-sm text-slate-700">Connectez-vous en tant que bob et consultez la section Réseau. Trouvez un moyen de cartographier les routes internes du proxy.</p>
+        <details class="border rounded border-amber-200">
+            <summary class="cursor-pointer bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">Révéler l'indice</summary>
+            <div class="p-3 text-sm text-amber-900 space-y-1">
+                <p>Une interface d'administration du reverse proxy est-elle exposée ?</p>
+                <p>Peut-on lister les routers et services via une route technique ?</p>
+                <p>Quelle option active ce comportement dans la configuration ?</p>
+            </div>
+        </details>
+        <details class="border rounded border-green-200">
+            <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution et correction</summary>
+            <div class="p-3 text-sm text-green-900 space-y-3">
+                <p><strong>Payload :</strong> ouvrir <code>http://localhost:8080/dashboard/</code> puis <code>http://localhost:8080/api/http/routers</code>.</p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code># Résultat observé
+Routers, services, middlewares et noms internes visibles sans authentification</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code># ❌ Vulnérable
+command:
+  - --api.insecure=true
+  - --providers.docker.exposedbydefault=false
+
+# ✅ Corrigé
+command:
+  - --api.insecure=false
+  - --providers.docker.exposedbydefault=false
+  # dashboard désactivé ou protégé (auth, IP, VPN)</code></pre>
+                <p class="text-xs">Principe OWASP : un outil d'administration exposé facilite la reconnaissance attaquant.</p>
+            </div>
+        </details>
+    </section>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold text-blue-700">Challenge 4 · Security Misconfiguration</p>
+                <h3 class="text-lg font-semibold">MySQL et phpMyAdmin exposés</h3>
+            </div>
+            <span class="text-amber-500">★★★★☆</span>
+        </div>
+        <p class="text-sm text-slate-700">Connectez-vous en tant que admin et ouvrez Infrastructure. Trouvez un moyen d'atteindre des services internes hors du périmètre applicatif.</p>
+        <details class="border rounded border-amber-200">
+            <summary class="cursor-pointer bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">Révéler l'indice</summary>
+            <div class="p-3 text-sm text-amber-900 space-y-1">
+                <p>Quels ports de services internes sont exposés côté hôte ?</p>
+                <p>Une interface SQL d'administration est-elle accessible publiquement ?</p>
+                <p>Quel serait le périmètre minimal en environnement de production ?</p>
+            </div>
+        </details>
+        <details class="border rounded border-green-200">
+            <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution et correction</summary>
+            <div class="p-3 text-sm text-green-900 space-y-3">
+                <p><strong>Payload :</strong> accès direct à <code>https://pma.owasp.localhost</code>.</p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code># Résultat observé
+Service MySQL atteignable hors Docker + interface phpMyAdmin exposée</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code># ❌ Vulnérable
+database:
+  ports:
+    - 3306:3306
+database_administration:
+  labels:
+    - traefik.enable=true
+
+# ✅ Corrigé
+database:
+  # pas de publication de port en production
+database_administration:
+  # service retiré du compose de production</code></pre>
+                <p class="text-xs">Principe OWASP : exposer un service interne augmente inutilement la surface d'attaque.</p>
+            </div>
+        </details>
+    </section>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold text-blue-700">Challenge 5 · Security Misconfiguration</p>
+                <h3 class="text-lg font-semibold">CORS trop permissif sur API interne</h3>
+            </div>
+            <span class="text-amber-500">★★★★☆</span>
+        </div>
+        <p class="text-sm text-slate-700">Connectez-vous en tant que alice et utilisez l'API interne du front-office. Trouvez un moyen de lire la réponse depuis un site externe.</p>
+        <details class="border rounded border-amber-200">
+            <summary class="cursor-pointer bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">Révéler l'indice</summary>
+            <div class="p-3 text-sm text-amber-900 space-y-1">
+                <p>Comparez l'en-tête Origin reçu et l'en-tête CORS renvoyé.</p>
+                <p>Une allowlist stricte d'origines est-elle appliquée ?</p>
+                <p>Credentials est-il actif alors que l'origine n'est pas maîtrisée ?</p>
+            </div>
+        </details>
+        <details class="border rounded border-green-200">
+            <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution et correction</summary>
+            <div class="p-3 text-sm text-green-900 space-y-3">
+                <p><strong>Payload :</strong> requête cross-origin avec <code>Origin: https://evil.local</code> vers <code>/api/internal/profile</code>.</p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code># Résultat observé
+Access-Control-Allow-Origin reflète l'origine et credentials=true</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
+$origin = $request-&gt;headers-&gt;get('Origin', '*');
+$response-&gt;headers-&gt;set('Access-Control-Allow-Origin', $origin);
+$response-&gt;headers-&gt;set('Access-Control-Allow-Credentials', 'true');
+
+// ✅ Corrigé
+$allowed = ['https://front.owasp.localhost'];
+if (in_array((string) $origin, $allowed, true)) {
+    $response-&gt;headers-&gt;set('Access-Control-Allow-Origin', (string) $origin);
+}
+$response-&gt;headers-&gt;set('Access-Control-Allow-Credentials', 'false');</code></pre>
+                <p class="text-xs">Principe OWASP : CORS est une frontière navigateur qui doit être configurée strictement.</p>
+            </div>
+        </details>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center p-6">
+<div class="w-full max-w-md bg-white border border-slate-200 rounded-lg shadow-sm p-6">
+    <h1 class="text-xl font-semibold mb-2">Onboarding opérateur</h1>
+    <p class="text-sm text-slate-600 mb-6">Créer un accès pour un nouveau collaborateur de l'équipe CustomerOps.</p>
+
+    {% for type, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="mb-3 rounded border px-3 py-2 text-sm {{ type == 'error' ? 'border-red-300 bg-red-50 text-red-700' : 'border-emerald-300 bg-emerald-50 text-emerald-700' }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <form method="post" action="{{ path('api_lab_register') }}" class="space-y-4">
+        <div>
+            <label for="username" class="block text-sm font-medium mb-1">Utilisateur</label>
+            <input id="username" name="username" type="text" required class="w-full rounded border border-slate-300 px-3 py-2">
+        </div>
+        <div>
+            <label for="full_name" class="block text-sm font-medium mb-1">Nom complet</label>
+            <input id="full_name" name="full_name" type="text" required class="w-full rounded border border-slate-300 px-3 py-2">
+        </div>
+        <div>
+            <label for="password" class="block text-sm font-medium mb-1">Mot de passe</label>
+            <input id="password" name="password" type="password" required class="w-full rounded border border-slate-300 px-3 py-2">
+        </div>
+        <button type="submit" class="w-full rounded bg-slate-900 text-white py-2 text-sm">Créer l'accès</button>
+    </form>
+
+    <a href="{{ path('login') }}" class="mt-4 inline-block text-sm text-blue-600 hover:underline">Retour connexion</a>
+</div>
+</body>
+</html>

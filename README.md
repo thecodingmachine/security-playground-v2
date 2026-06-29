@@ -48,10 +48,11 @@ Two files should be generated: `local-cert.pem` and `local-key.pem`. And then yo
 
 #### 4. Start the OWASP module you want
 
-Each module lives in its own folder (`owasp-01`, `owasp-06`, `owasp-07`, `owasp-09`). To start one, run the matching Make target:
+Each module lives in its own folder (`owasp-01`, `owasp-02`, `owasp-06`, `owasp-07`, `owasp-09`). To start one, run the matching Make target:
 
 ```shell
 make owasp-01   # A01 - Broken Access Control
+make owasp-02   # A02 - Security Misconfiguration
 make owasp-06   # A06 - Insecure Design
 make owasp-07   # A07 - Authentication Failures
 make owasp-09   # A09 - Security Logging and Alerting Failures

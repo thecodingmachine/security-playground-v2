@@ -30,8 +30,8 @@ services:
         APACHE_DOCUMENT_ROOT: public
         # LARAVEL SPECIFICS
         APP_NAME: ${APP_NAME}
-        APP_ENV: ${ENV}
-        APP_DEBUG: ${DEBUG}
+        # APP_ENV: dev
+        # APP_DEBUG: 1
         APP_URL: ${HTTP_PROTOCOL}://${DOMAIN}
         APP_KEY: ${APP_KEY}
         APP_LOCALE: ${APP_LOCALE}
@@ -72,6 +72,9 @@ services:
         DB_USERNAME: ${DATABASE_USER}
         DB_PASSWORD: ${DATABASE_PASSWORD}
         DB_HOST: ${DATABASE_HOST}
+        # SYMFONY SPECIFICS
+        APP_SECRET: change-this-secret-for-training
+        DATABASE_URL: mysql://${DATABASE_USER}:${DATABASE_PASSWORD}@database:3306/${DATABASE_NAME}?serverVersion=8.4&charset=utf8mb4
         # EMAILING
         MAIL_MAILER: ${MAIL_MAILER}
         MAIL_SCHEME: ${MAIL_SCHEME}
@@ -87,19 +90,29 @@ services:
         - traefik.http.routers.backend.tls=true
       working_dir: /var/www/html
       volumes:
-        - ./owasp-01:/var/www/html
+        # - ./owasp-01:/var/www/html
+        # - ./owasp-02:/var/www/html
+        # - ./owasp-05:/var/www/html
+        - ./owasp-04:/var/www/html
         # - ./owasp-06:/var/www/html
         # - ./owasp-07:/var/www/html
+        # - ./owasp-08:/var/www/html
         # - ./owasp-09:/var/www/html
+        # - ./owasp-10:/var/www/html
         - ./orchestrator/certs:/certs:ro
 
     database:
       image: ${HUB_PROXY}/mysql:8.4
       volumes:
-        - database_owasp_01_volume:/var/lib/mysql
+        # - database_owasp_01_volume:/var/lib/mysql
+        # - database_owasp_02_volume:/var/lib/mysql
+        # - database_owasp_05_volume:/var/lib/mysql
+        - database_owasp_04_volume:/var/lib/mysql
         # - database_owasp_06_volume:/var/lib/mysql
         # - database_owasp_07_volume:/var/lib/mysql
+        # - database_owasp_08_volume:/var/lib/mysql
         # - database_owasp_09_volume:/var/lib/mysql
+        # - database_owasp_10_volume:/var/lib/mysql
       environment:
         MYSQL_DATABASE: ${DATABASE_NAME}
         MYSQL_USER: ${DATABASE_USER}
@@ -150,8 +163,13 @@ services:
 
 volumes:
     database_owasp_01_volume:
+    database_owasp_02_volume:
+    database_owasp_05_volume:
+    database_owasp_04_volume:
     database_owasp_06_volume:
     database_owasp_07_volume:
+    database_owasp_08_volume:
     database_owasp_09_volume:
+    database_owasp_10_volume:
     redis_volume:
     maildir_volume:

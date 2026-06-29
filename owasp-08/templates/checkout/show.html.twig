@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Checkout {{ order.reference }}{% endblock %}
+
+{% block body %}
+<div class="space-y-6">
+    <section class="bg-white border border-slate-200 rounded-lg p-5">
+        <h2 class="text-xl font-semibold">Paiement de {{ order.reference }}</h2>
+        <p class="text-sm text-slate-600 mt-1">Montant à régler: {{ (order.amountCents / 100)|number_format(2, ',', ' ') }} {{ order.currency }}.</p>
+
+        <div class="mt-4 flex flex-wrap gap-3 text-sm">
+            <a class="rounded bg-slate-900 px-4 py-2 text-white" href="{{ path('payment_return', {
+                order_reference: order.reference,
+                status: 'paid',
+                amount_cents: order.amountCents,
+                currency: order.currency
+            }) }}">
+                Retour navigateur après paiement
+            </a>
+            <a class="rounded border border-slate-300 px-4 py-2" href="{{ path('orders_show', {id: order.id}) }}">Revenir à la commande</a>
+        </div>
+    </section>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5">
+        <h3 class="font-semibold">Webhook de confirmation attendu</h3>
+        <pre class="mt-3 bg-slate-900 text-slate-100 text-xs p-4 rounded overflow-x-auto"><code>{
+  "event_id": "evt_2026_0001",
+  "event_type": "payment_succeeded",
+  "order_reference": "{{ order.reference }}",
+  "amount_cents": {{ order.amountCents }},
+  "currency": "{{ order.currency }}"
+}</code></pre>
+    </section>
+</div>
+{% endblock %}
+

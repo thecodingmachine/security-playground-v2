@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Infrastructure{% endblock %}
+
+{% block body %}
+<div class="bg-white border border-slate-200 rounded-lg p-6 space-y-4">
+    <h2 class="text-xl font-semibold">Administration données</h2>
+    <p class="text-sm text-slate-600">Accès de support pour l'équipe base de données.</p>
+    <div class="border border-slate-100 rounded p-4 text-sm space-y-2">
+        <p class="font-medium text-slate-800">Checklist exposition services</p>
+        <p class="text-slate-600">- Vérifier si la base est publiée sur l'hôte.</p>
+        <p class="text-slate-600">- Vérifier si l'interface d'administration SQL est exposée publiquement.</p>
+        <p class="text-slate-600">- Valider que ces services restent internes hors besoin local explicite.</p>
+    </div>
+    <ul class="space-y-2 text-sm">
+        <li class="border border-slate-100 rounded p-3">
+            <span class="font-medium">MySQL hôte</span> : localhost:3306
+        </li>
+        <li class="border border-slate-100 rounded p-3">
+            <span class="font-medium">phpMyAdmin</span> : <a class="text-blue-600 hover:underline" href="https://pma.owasp.localhost">https://pma.owasp.localhost</a>
+        </li>
+    </ul>
+</div>
+{% endblock %}

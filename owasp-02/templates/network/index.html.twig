@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Réseau{% endblock %}
+
+{% block body %}
+<div class="bg-white border border-slate-200 rounded-lg p-6 space-y-4">
+    <h2 class="text-xl font-semibold">Vue reverse proxy</h2>
+    <p class="text-sm text-slate-600">Outils de diagnostic des routes techniques du reverse proxy local.</p>
+    <div class="border border-slate-100 rounded p-4 text-sm space-y-2">
+        <p class="font-medium text-slate-800">Checklist réseau</p>
+        <p class="text-slate-600">- Vérifier si une interface d'administration est accessible sur le port technique.</p>
+        <p class="text-slate-600">- Vérifier si l'API de découverte expose routers, services et middlewares.</p>
+        <p class="text-slate-600">- Port technique local utilisé dans ce module : <code>8080</code>.</p>
+    </div>
+    <div class="space-y-2 text-sm">
+        <a href="http://localhost:8080/dashboard/" class="block text-blue-600 hover:underline">Ouvrir le dashboard technique</a>
+        <a href="http://localhost:8080/api/http/routers" class="block text-blue-600 hover:underline">Ouvrir l'API des routers</a>
+    </div>
+</div>
+{% endblock %}

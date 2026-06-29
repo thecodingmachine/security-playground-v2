@@ -1,0 +1,197 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Challenges A08{% endblock %}
+
+{% block body %}
+<div class="space-y-6">
+    <div class="bg-white border border-slate-200 rounded-lg p-5">
+        <div class="flex items-center gap-2 mb-2">
+            <span class="px-2 py-1 rounded bg-rose-100 text-rose-700 text-xs font-semibold">OWASP A08:2021</span>
+            <span class="px-2 py-1 rounded bg-slate-100 text-slate-700 text-xs">Software or Data Integrity Failure</span>
+        </div>
+        <h2 class="text-2xl font-semibold">Challenges de formation</h2>
+        <p class="text-sm text-slate-600 mt-1">Comptes: alice / alice123 · bob / bob123 · admin / admin123</p>
+    </div>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold text-blue-700">Challenge 1 · Software or Data Integrity Failure</p>
+                <h3 class="text-lg font-semibold">Webhook de paiement non signé</h3>
+            </div>
+            <span class="text-amber-500">★★★☆☆</span>
+        </div>
+        <p class="text-sm text-slate-700">Connectez-vous en tant que alice et ouvrez la commande en attente. Trouvez un moyen de la faire passer à paid sans paiement réel.</p>
+        <details class="border rounded border-amber-200">
+            <summary class="cursor-pointer bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">Révéler l'indice</summary>
+            <div class="p-3 text-sm text-amber-900 space-y-1">
+                <p>Quel endpoint décide que la commande devient paid ?</p>
+                <p>Quelles preuves d'origine du webhook sont vérifiées avant le changement de statut ?</p>
+                <p>Un JSON correct suffit-il pour déclencher une action critique ?</p>
+            </div>
+        </details>
+        <details class="border rounded border-green-200">
+            <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
+            <div class="p-3 text-sm text-green-900 space-y-3">
+                <p><strong>Payload local:</strong></p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>{
+  "event_id": "evt_2026_0001",
+  "event_type": "payment_succeeded",
+  "order_reference": "ORDER-2026-0001",
+  "amount_cents": 4999,
+  "currency": "EUR"
+}</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
+if ($eventType === 'payment_succeeded') {
+    $order->setStatus('paid');
+    $entityManager->flush();
+}</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
+$payload = $request->getContent();
+$receivedSignature = $request->headers->get('X-Signature');
+$expectedSignature = hash_hmac('sha256', $payload, $webhookSecret);
+
+if (!is_string($receivedSignature) || !hash_equals($expectedSignature, $receivedSignature)) {
+    throw new AccessDeniedHttpException('Invalid webhook signature.');
+}</code></pre>
+                <p class="text-xs">Principe OWASP: un webhook critique doit être authentifié et vérifié avant traitement.</p>
+            </div>
+        </details>
+    </section>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold text-blue-700">Challenge 2 · Software or Data Integrity Failure</p>
+                <h3 class="text-lg font-semibold">Rejeu d'un événement déjà traité</h3>
+            </div>
+            <span class="text-amber-500">★★★★☆</span>
+        </div>
+        <p class="text-sm text-slate-700">Connectez-vous en tant que alice et suivez le traitement de règlement après paiement. Trouvez un moyen de déclencher deux effets métier avec le même événement.</p>
+        <details class="border rounded border-amber-200">
+            <summary class="cursor-pointer bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">Révéler l'indice</summary>
+            <div class="p-3 text-sm text-amber-900 space-y-1">
+                <p>Le champ event_id est-il mémorisé après un premier passage ?</p>
+                <p>Que se passe-t-il si le même payload est rejoué à l'identique ?</p>
+                <p>La logique est-elle idempotente autour des factures et historiques ?</p>
+            </div>
+        </details>
+        <details class="border rounded border-green-200">
+            <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
+            <div class="p-3 text-sm text-green-900 space-y-3">
+                <p><strong>Démonstration locale:</strong> rejouer deux fois le même payload signé sur <code>/webhooks/payment/settlement</code> crée des doublons.</p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
+$history = (new PaymentHistory())
+    ->setEventId($eventId);
+$entityManager->persist($history);
+$entityManager->flush();</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
+$alreadyProcessed = $processedWebhookEventRepository->findOneBy([
+    'eventId' => $eventId,
+]);
+
+if ($alreadyProcessed !== null) {
+    return new JsonResponse([
+        'status' => 'ignored',
+        'reason' => 'event_already_processed',
+    ]);
+}</code></pre>
+                <p class="text-xs">Principe OWASP: un événement critique doit être authentifié, mais aussi traité une seule fois.</p>
+            </div>
+        </details>
+    </section>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold text-blue-700">Challenge 3 · Software or Data Integrity Failure</p>
+                <h3 class="text-lg font-semibold">Retour paiement côté navigateur</h3>
+            </div>
+            <span class="text-amber-500">★★★☆☆</span>
+        </div>
+        <p class="text-sm text-slate-700">Connectez-vous en tant que alice et passez par le retour de paiement normal. Trouvez un moyen de forcer paid via l'URL.</p>
+        <details class="border rounded border-amber-200">
+            <summary class="cursor-pointer bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">Révéler l'indice</summary>
+            <div class="p-3 text-sm text-amber-900 space-y-1">
+                <p>Quels paramètres sont reçus depuis le navigateur ?</p>
+                <p>Les valeurs status, amount et currency sont-elles recalculées côté serveur ?</p>
+                <p>Une URL de retour est-elle utilisée comme preuve de paiement ?</p>
+            </div>
+        </details>
+        <details class="border rounded border-green-200">
+            <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
+            <div class="p-3 text-sm text-green-900 space-y-3">
+                <p><strong>URL locale:</strong> <code>/payment/return?order_reference=ORDER-2026-0001&status=paid&amount_cents=4999&currency=EUR</code></p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
+if ($status === 'paid') {
+    $order->setStatus('paid');
+    $entityManager->flush();
+}</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
+$order = $orderRepository->findOneBy([
+    'reference' => $orderReference,
+]);
+
+return $this->render('payment/return.html.twig', [
+    'order' => $order,
+    'message' => 'Votre paiement est en cours de vérification.',
+]);</code></pre>
+                <p class="text-xs">Principe OWASP: une donnée critique venant du navigateur ne doit jamais être crue sans vérification serveur.</p>
+            </div>
+        </details>
+    </section>
+
+    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-xs font-semibold text-blue-700">Challenge 4 · Software or Data Integrity Failure</p>
+                <h3 class="text-lg font-semibold">Import catalogue non vérifié</h3>
+            </div>
+            <span class="text-amber-500">★★★★☆</span>
+        </div>
+        <p class="text-sm text-slate-700">Connectez-vous en tant que admin et réalisez un import catalogue normal. Trouvez un moyen de modifier un champ critique non prévu.</p>
+        <details class="border rounded border-amber-200">
+            <summary class="cursor-pointer bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">Révéler l'indice</summary>
+            <div class="p-3 text-sm text-amber-900 space-y-1">
+                <p>Quels champs du fichier sont réellement appliqués en base ?</p>
+                <p>Y a-t-il une allowlist de colonnes métier autorisées ?</p>
+                <p>Le fichier importé est-il contrôlé côté intégrité avant application ?</p>
+            </div>
+        </details>
+        <details class="border rounded border-green-200">
+            <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
+            <div class="p-3 text-sm text-green-900 space-y-3">
+                <p><strong>Fichier local:</strong></p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>[
+  {
+    "sku": "PHONE-001",
+    "name": "Business Phone",
+    "price_cents": 1,
+    "discount_percent": 90,
+    "is_public": true,
+    "status": "validated"
+  }
+]</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
+if (isset($row['price_cents'])) {
+    $product->setPriceCents((int) $row['price_cents']);
+}
+if (isset($row['status'])) {
+    $product->setStatus((string) $row['status']);
+}</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
+$allowedFields = ['sku', 'name', 'description'];
+$cleanRow = [];
+
+foreach ($allowedFields as $field) {
+    if (array_key_exists($field, $row)) {
+        $cleanRow[$field] = $row[$field];
+    }
+}</code></pre>
+                <p class="text-xs">Principe OWASP: un fichier métier critique doit être validé, borné et vérifié avant application.</p>
+            </div>
+        </details>
+    </section>
+</div>
+{% endblock %}
+

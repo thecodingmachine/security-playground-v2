@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}OWASP A02{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 text-slate-900 min-h-screen">
+<div class="min-h-screen flex">
+    <aside class="w-72 bg-slate-900 text-slate-100 p-6 space-y-6">
+        <div>
+            <p class="text-xs uppercase tracking-wider text-slate-400">Security Playground</p>
+            <h1 class="text-lg font-semibold">OWASP A02</h1>
+        </div>
+
+        <nav class="space-y-1 text-sm">
+            <a href="{{ path('dashboard') }}" class="block rounded px-3 py-2 hover:bg-slate-800">Tableau de bord</a>
+            <a href="{{ path('reports_index') }}" class="block rounded px-3 py-2 hover:bg-slate-800">Rapports</a>
+            <a href="{{ path('diagnostics_index') }}" class="block rounded px-3 py-2 hover:bg-slate-800">Diagnostics</a>
+            <a href="{{ path('network_index') }}" class="block rounded px-3 py-2 hover:bg-slate-800">Réseau</a>
+            <a href="{{ path('infrastructure_index') }}" class="block rounded px-3 py-2 hover:bg-slate-800">Infrastructure</a>
+            <a href="{{ path('challenges_index') }}" class="block rounded px-3 py-2 hover:bg-slate-800">Challenges</a>
+            <a href="{{ path('api_internal_profile') }}" class="block rounded px-3 py-2 hover:bg-slate-800">API interne</a>
+        </nav>
+
+        <form method="post" action="{{ path('logout') }}">
+            <button type="submit" class="w-full px-3 py-2 rounded bg-slate-800 hover:bg-slate-700 text-sm">Se déconnecter</button>
+        </form>
+    </aside>
+
+    <main class="flex-1 p-8">
+        {% block body %}{% endblock %}
+    </main>
+</div>
+</body>
+</html>
