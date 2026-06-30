@@ -39,8 +39,8 @@ class ReportRepository extends ServiceEntityRepository
     public function findSensitiveExportRows(): array
     {
         $query = $this->createQueryBuilder('report')
-            ->select('report.title AS title, owner.username AS owner, report.createdAt AS created_at')
-            ->innerJoin('report.owner', 'owner')
+            ->select('report.title AS title, report_owner.username AS owner, report.createdAt AS created_at')
+            ->innerJoin('report.owner', 'report_owner')
             ->andWhere('report.isSensitive = :sensitive')
             ->setParameter('sensitive', true)
             ->orderBy('report.id', 'ASC')

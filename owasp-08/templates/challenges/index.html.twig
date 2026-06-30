@@ -33,7 +33,7 @@
         <details class="border rounded border-green-200">
             <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
             <div class="p-3 text-sm text-green-900 space-y-3">
-                <p><strong>Payload local:</strong></p>
+                <p><strong>Payload local (Postman/curl):</strong></p>
                 <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>{
   "event_id": "evt_2026_0001",
   "event_type": "payment_succeeded",
@@ -41,19 +41,38 @@
   "amount_cents": 4999,
   "currency": "EUR"
 }</code></pre>
+                <p><strong>Reproduction :</strong> envoyer ce JSON sur <code>POST /webhooks/payment</code> sans signature.</p>
+                <p><strong>Résultat vulnérable :</strong> réponse <code>processed</code> et commande marquée <code>paid</code>.</p>
                 <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
-if ($eventType === 'payment_succeeded') {
+$eventType = $payload['event_type'] ?? null;
+$orderReference = $payload['order_reference'] ?? null;
+
+if ($eventType === 'payment_succeeded' && is_string($orderReference)) {
     $order->setStatus('paid');
     $entityManager->flush();
 }</code></pre>
                 <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
-$payload = $request->getContent();
+#[Autowire('%env(string:WEBHOOK_SHARED_SECRET)%')] string $webhookSecret
+$rawPayload = $request->getContent();
 $receivedSignature = $request->headers->get('X-Signature');
-$expectedSignature = hash_hmac('sha256', $payload, $webhookSecret);
+$expectedSignature = hash_hmac('sha256', $rawPayload, $webhookSecret);
 
 if (!is_string($receivedSignature) || !hash_equals($expectedSignature, $receivedSignature)) {
     throw new AccessDeniedHttpException('Invalid webhook signature.');
+}
+
+$data = json_decode($rawPayload, true, 512, JSON_THROW_ON_ERROR);
+if (($data['event_type'] ?? null) === 'payment_succeeded') {
+    $order->setStatus('paid');
+    $entityManager->flush();
 }</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code># owasp-08/.env.local
+WEBHOOK_SHARED_SECRET=training-webhook-secret-dev
+
+# Postman Header
+X-Signature: 7cc87288a6f81088914a4907a964a6e92bd552b6b85677adcdebcdc8e8b1e05f</code></pre>
+                <p><strong>Pourquoi cette valeur et pas la clé :</strong> <code>X-Signature</code> doit contenir la signature HMAC-SHA256 du payload, calculée avec la clé secrète. La clé (<code>WEBHOOK_SHARED_SECRET</code>) ne doit jamais être envoyée au serveur dans la requête.</p>
+                <p><strong>Validation :</strong> sans <code>X-Signature</code> => <code>403</code>, avec signature valide => <code>200</code>.</p>
                 <p class="text-xs">Principe OWASP: un webhook critique doit être authentifié et vérifié avant traitement.</p>
             </div>
         </details>
@@ -79,14 +98,49 @@ if (!is_string($receivedSignature) || !hash_equals($expectedSignature, $received
         <details class="border rounded border-green-200">
             <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
             <div class="p-3 text-sm text-green-900 space-y-3">
-                <p><strong>Démonstration locale:</strong> rejouer deux fois le même payload signé sur <code>/webhooks/payment/settlement</code> crée des doublons.</p>
+                <p><strong>Payload local (Postman/curl):</strong></p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>{"event_id":"evt_replay_0001","event_type":"payment_succeeded","order_reference":"ORDER-2026-0001","amount_cents":4999,"currency":"EUR"}</code></pre>
+                <p><strong>Endpoint à utiliser :</strong> <code>POST /webhooks/payment/settlement</code> (pas <code>/webhooks/payment</code>).</p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code># Postman Headers
+Content-Type: application/json
+X-Signature: cc80a71082070ebee54540d9900ebad7767d622f15a089ba8babb36872021f2f</code></pre>
+                <p><strong>Reproduction :</strong> envoyer exactement la même requête deux fois avec le même <code>event_id</code>.</p>
+                <p><strong>Résultat vulnérable :</strong> les effets métier sont rejoués (historique/facture/crédit/notification en doublon).</p>
                 <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
+$invoice = (new Invoice())
+    ->setOrder($order)
+    ->setInvoiceNumber(sprintf('INV-%s-%03d', $order->getReference(), $invoiceRepository->nextSequenceForOrder($order)))
+    ->setAmountCents($order->getAmountCents())
+    ->setCurrency($order->getCurrency())
+    ->setCreatedAt(new \DateTimeImmutable());
+$entityManager->persist($invoice);
+
 $history = (new PaymentHistory())
-    ->setEventId($eventId);
+    ->setOrder($order)
+    ->setEventId($eventId)
+    ->setEventType($eventType)
+    ->setPayloadSnapshot($payload)
+    ->setCreatedAt(new \DateTimeImmutable());
 $entityManager->persist($history);
+
+$credit = (new LoyaltyCredit())
+    ->setOrder($order)
+    ->setBeneficiary($order->getCustomer())
+    ->setPoints(50)
+    ->setReason('Paiement confirmé par webhook')
+    ->setCreatedAt(new \DateTimeImmutable());
+$entityManager->persist($credit);
+
+$notification = (new InternalNotification())
+    ->setOrder($order)
+    ->setMessage(sprintf('Commande %s réglée, facture générée.', $order->getReference()))
+    ->setCreatedAt(new \DateTimeImmutable());
+$entityManager->persist($notification);
+
 $entityManager->flush();</code></pre>
                 <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
-$alreadyProcessed = $processedWebhookEventRepository->findOneBy([
+// + ajouter: use App\Entity\ProcessedWebhookEvent;
+$alreadyProcessed = $entityManager->getRepository(ProcessedWebhookEvent::class)->findOneBy([
     'eventId' => $eventId,
 ]);
 
@@ -95,7 +149,54 @@ if ($alreadyProcessed !== null) {
         'status' => 'ignored',
         'reason' => 'event_already_processed',
     ]);
-}</code></pre>
+}
+
+$invoice = (new Invoice())
+    ->setOrder($order)
+    ->setInvoiceNumber(sprintf('INV-%s-%03d', $order->getReference(), $invoiceRepository->nextSequenceForOrder($order)))
+    ->setAmountCents($order->getAmountCents())
+    ->setCurrency($order->getCurrency())
+    ->setCreatedAt(new \DateTimeImmutable());
+$entityManager->persist($invoice);
+
+$history = (new PaymentHistory())
+    ->setOrder($order)
+    ->setEventId($eventId)
+    ->setEventType($eventType)
+    ->setPayloadSnapshot($payload)
+    ->setCreatedAt(new \DateTimeImmutable());
+$entityManager->persist($history);
+
+$credit = (new LoyaltyCredit())
+    ->setOrder($order)
+    ->setBeneficiary($order->getCustomer())
+    ->setPoints(50)
+    ->setReason('Paiement confirmé par webhook')
+    ->setCreatedAt(new \DateTimeImmutable());
+$entityManager->persist($credit);
+
+$notification = (new InternalNotification())
+    ->setOrder($order)
+    ->setMessage(sprintf('Commande %s réglée, facture générée.', $order->getReference()))
+    ->setCreatedAt(new \DateTimeImmutable());
+$entityManager->persist($notification);
+
+$processed = (new ProcessedWebhookEvent())
+    ->setEventId($eventId)
+    ->setProcessedAt(new \DateTimeImmutable());
+$entityManager->persist($processed);
+
+$entityManager->flush();</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code># Vérification SQL (après 2 envois identiques)
+SELECT event_id, COUNT(*) AS c
+FROM payment_history
+WHERE event_id = 'evt_replay_0001'
+GROUP BY event_id;</code></pre>
+                <p><strong>Validation :</strong> vulnérable => <code>c = 2</code>; corrigé => 1er appel <code>processed</code>, 2e appel <code>ignored</code> et <code>c = 1</code>.</p>
+                <p><strong>Source vulnérable :</strong> <code>owasp-08/src/Controller/PaymentSettlementWebhookController.php</code> (méthode <code>__invoke</code>).</p>
+                <p><strong>Point d'appel :</strong> route <code>POST /webhooks/payment/settlement</code>.</p>
+                <p><strong>Dépendances :</strong> aucune dépendance Composer à ajouter (entité <code>processed_webhook_event</code> déjà présente).</p>
+                <p><strong>Approche :</strong> imposer l’idempotence par <code>event_id</code> et encapsuler le traitement dans une transaction atomique.</p>
                 <p class="text-xs">Principe OWASP: un événement critique doit être authentifié, mais aussi traité une seule fois.</p>
             </div>
         </details>
@@ -121,77 +222,42 @@ if ($alreadyProcessed !== null) {
         <details class="border rounded border-green-200">
             <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
             <div class="p-3 text-sm text-green-900 space-y-3">
-                <p><strong>URL locale:</strong> <code>/payment/return?order_reference=ORDER-2026-0001&status=paid&amount_cents=4999&currency=EUR</code></p>
+                <p><strong>URL locale:</strong> <code>/payment/return?order_reference=ORDER-2026-0001&amp;status=paid&amp;amount_cents=4999&amp;currency=EUR</code></p>
+                <p><strong>Reproduction :</strong> ouvrir directement cette URL depuis le navigateur en étant connecté, puis revenir sur le détail de commande.</p>
+                <p><strong>Résultat vulnérable :</strong> la commande passe à <code>paid</code> via des paramètres URL contrôlés par le client.</p>
                 <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
-if ($status === 'paid') {
+if ($status === 'paid' && $amountCents > 0 && $currency !== '') {
     $order->setStatus('paid');
     $entityManager->flush();
 }</code></pre>
                 <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
-$order = $orderRepository->findOneBy([
-    'reference' => $orderReference,
-]);
+$orderReference = $request->query->getString('order_reference');
+$status = $request->query->getString('status');
+$amountCents = $request->query->getInt('amount_cents');
+$currency = $request->query->getString('currency');
+
+$order = $orderRepository->findOneByReference($orderReference);
+
+if ($order === null) {
+    throw $this->createNotFoundException('Order not found.');
+}
+
+// Ne jamais décider "paid" ici : route d'affichage uniquement.
 
 return $this->render('payment/return.html.twig', [
     'order' => $order,
-    'message' => 'Votre paiement est en cours de vérification.',
+    'status' => $status,
+    'amount_cents' => $amountCents,
+    'currency' => $currency,
 ]);</code></pre>
+                <p><strong>Source vulnérable :</strong> <code>owasp-08/src/Controller/PaymentReturnController.php</code> (méthode <code>__invoke</code>).</p>
+                <p><strong>Point d'appel :</strong> route <code>GET /payment/return</code>, utilisée depuis <code>owasp-08/templates/checkout/show.html.twig</code>.</p>
+                <p><strong>Dépendances :</strong> aucune dépendance Composer ni import PHP à ajouter.</p>
+                <p><strong>Approche :</strong> considérer le retour navigateur comme informatif uniquement; la confirmation réelle reste côté webhook serveur signé.</p>
                 <p class="text-xs">Principe OWASP: une donnée critique venant du navigateur ne doit jamais être crue sans vérification serveur.</p>
             </div>
         </details>
     </section>
 
-    <section class="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
-        <div class="flex items-start justify-between">
-            <div>
-                <p class="text-xs font-semibold text-blue-700">Challenge 4 · Software or Data Integrity Failure</p>
-                <h3 class="text-lg font-semibold">Import catalogue non vérifié</h3>
-            </div>
-            <span class="text-amber-500">★★★★☆</span>
-        </div>
-        <p class="text-sm text-slate-700">Connectez-vous en tant que admin et réalisez un import catalogue normal. Trouvez un moyen de modifier un champ critique non prévu.</p>
-        <details class="border rounded border-amber-200">
-            <summary class="cursor-pointer bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">Révéler l'indice</summary>
-            <div class="p-3 text-sm text-amber-900 space-y-1">
-                <p>Quels champs du fichier sont réellement appliqués en base ?</p>
-                <p>Y a-t-il une allowlist de colonnes métier autorisées ?</p>
-                <p>Le fichier importé est-il contrôlé côté intégrité avant application ?</p>
-            </div>
-        </details>
-        <details class="border rounded border-green-200">
-            <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
-            <div class="p-3 text-sm text-green-900 space-y-3">
-                <p><strong>Fichier local:</strong></p>
-                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>[
-  {
-    "sku": "PHONE-001",
-    "name": "Business Phone",
-    "price_cents": 1,
-    "discount_percent": 90,
-    "is_public": true,
-    "status": "validated"
-  }
-]</code></pre>
-                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
-if (isset($row['price_cents'])) {
-    $product->setPriceCents((int) $row['price_cents']);
-}
-if (isset($row['status'])) {
-    $product->setStatus((string) $row['status']);
-}</code></pre>
-                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
-$allowedFields = ['sku', 'name', 'description'];
-$cleanRow = [];
-
-foreach ($allowedFields as $field) {
-    if (array_key_exists($field, $row)) {
-        $cleanRow[$field] = $row[$field];
-    }
-}</code></pre>
-                <p class="text-xs">Principe OWASP: un fichier métier critique doit être validé, borné et vérifié avant application.</p>
-            </div>
-        </details>
-    </section>
 </div>
 {% endblock %}
-

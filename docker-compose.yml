@@ -93,12 +93,12 @@ services:
         # - ./owasp-01:/var/www/html
         # - ./owasp-02:/var/www/html
         # - ./owasp-05:/var/www/html
-        - ./owasp-04:/var/www/html
+        # - ./owasp-04:/var/www/html
         # - ./owasp-06:/var/www/html
         # - ./owasp-07:/var/www/html
         # - ./owasp-08:/var/www/html
         # - ./owasp-09:/var/www/html
-        # - ./owasp-10:/var/www/html
+        - ./owasp-10:/var/www/html
         - ./orchestrator/certs:/certs:ro
 
     database:
@@ -107,12 +107,12 @@ services:
         # - database_owasp_01_volume:/var/lib/mysql
         # - database_owasp_02_volume:/var/lib/mysql
         # - database_owasp_05_volume:/var/lib/mysql
-        - database_owasp_04_volume:/var/lib/mysql
+        # - database_owasp_04_volume:/var/lib/mysql
         # - database_owasp_06_volume:/var/lib/mysql
         # - database_owasp_07_volume:/var/lib/mysql
         # - database_owasp_08_volume:/var/lib/mysql
         # - database_owasp_09_volume:/var/lib/mysql
-        # - database_owasp_10_volume:/var/lib/mysql
+        - database_owasp_10_volume:/var/lib/mysql
       environment:
         MYSQL_DATABASE: ${DATABASE_NAME}
         MYSQL_USER: ${DATABASE_USER}

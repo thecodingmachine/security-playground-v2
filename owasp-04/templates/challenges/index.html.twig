@@ -22,40 +22,70 @@
         <div class="flex items-start justify-between">
             <div>
                 <p class="text-xs font-semibold text-blue-700">Challenge 1 · Cryptographic Failure</p>
-                <h3 class="text-lg font-semibold">Onboarding opérateur et hash MD5</h3>
+                <h3 class="text-lg font-semibold">Audit dictionnaire : pourquoi MD5 casse vite</h3>
             </div>
             <span class="text-amber-500">★★★☆☆</span>
         </div>
-        <p class="text-sm text-slate-700">Connectez-vous en tant que alice et créez un nouvel opérateur depuis l'onboarding. Trouvez un moyen de retrouver rapidement le mot de passe depuis un export de sécurité.</p>
+        <p class="text-sm text-slate-700">Ouvrez l'export sécurité, puis utilisez l'atelier de comparaison pour tester des mots de passe du dictionnaire local. Montrez qu'un hash MD5 de mot de passe faible est retrouvé rapidement.</p>
         <details class="border rounded border-amber-200">
             <summary class="cursor-pointer bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">Révéler l'indice</summary>
             <div class="p-3 text-sm text-amber-900 space-y-1">
-                <p>Consultez la section exports sécurité.</p>
-                <p>Le hash observé ressemble-t-il à un algorithme lent moderne ?</p>
-                <p>Comparez les hashes avec la liste locale de mots de passe faibles.</p>
+                <p>Allez sur <code>/lab/password-dump</code> puis utilisez la section "Atelier pédagogique".</p>
+                <p>Sélectionnez un utilisateur et testez des candidats de la liste "Référentiel de mots de passe faibles".</p>
+                <p>Observez la comparaison <code>MD5(candidat)</code> vs hash stocké.</p>
             </div>
         </details>
         <details class="border rounded border-green-200">
             <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
             <div class="p-3 text-sm text-green-900 space-y-3">
-                <p><strong>Payload :</strong> ouvrir <code>/lab/password-dump</code>, calculer MD5 sur le dictionnaire local et comparer.</p>
+                <p><strong>Payload :</strong> dans <code>/lab/password-dump</code>, tester un mot faible (ex: <code>password</code>) dans l'atelier jusqu'à obtenir <code>MATCH</code>.</p>
                 <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
 // src/Controller/PasswordLabController.php
 $user->setPassword(md5($plainPassword));
 
 // src/Security/LoginFormAuthenticator.php
 return md5($plainPassword) === $user->getPassword();</code></pre>
-                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
-// config/packages/security.yaml
-password_hashers:
-  App\Entity\User:
-    algorithm: auto
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé (à faire dans 3 endroits)
+// 1) config/packages/security.yaml
+security:
+  password_hashers:
+    App\Entity\User:
+      algorithm: auto</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// 2) src/Controller/PasswordLabController.php
+// injecter UserPasswordHasherInterface $passwordHasher
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-// Inscription
-$user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
+public function register(
+    Request $request,
+    UserRepository $userRepository,
+    EntityManagerInterface $entityManager,
+    UserPasswordHasherInterface $passwordHasher
+): Response {
+    // ...
+    $user = (new User())
+        ->setUsername($username)
+        ->setFullName($fullName)
+        ->setRoles(['ROLE_USER'])
+        ->setPassword($passwordHasher->hashPassword($user, $plainPassword));
+    // ...
+}</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// 3) src/Security/LoginFormAuthenticator.php
+// injecter UserPasswordHasherInterface $passwordHasher
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-// Connexion
-$passwordHasher->isPasswordValid($user, $plainPassword);</code></pre>
+public function __construct(
+    UrlGeneratorInterface $urlGenerator,
+    UserRepository $userRepository,
+    UserPasswordHasherInterface $passwordHasher
+) {
+    $this->urlGenerator = $urlGenerator;
+    $this->userRepository = $userRepository;
+    $this->passwordHasher = $passwordHasher;
+}
+
+// remplacer md5(...) par :
+return $this->passwordHasher->isPasswordValid($user, $plainPassword);</code></pre>
+                <p class="text-xs">Important : si seul <code>security.yaml</code> est modifié, la connexion reste cassée car l'authenticator custom compare encore en MD5.</p>
                 <p class="text-xs">Principe OWASP : un mot de passe doit être haché avec un algorithme lent, salé et dédié aux mots de passe.</p>
             </div>
         </details>

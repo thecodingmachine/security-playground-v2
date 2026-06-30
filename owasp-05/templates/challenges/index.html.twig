@@ -33,20 +33,29 @@
         <details class="border rounded border-green-200">
             <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
             <div class="p-3 text-sm text-green-900 space-y-3">
-                <p><strong>Payload local:</strong> <code>" OR 1=1 -- </code></p>
+                <p><strong>Payload local:</strong> <code>" OR 1=1 -- -</code></p>
                 <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
 $sql = 'SELECT id, name, description, price_cents
         FROM product
         WHERE is_public = 1
         AND name LIKE "%'.$q.'%"';</code></pre>
-                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
-$sql = 'SELECT id, name, description, price_cents
-        FROM product
-        WHERE is_public = 1
-        AND name LIKE :query';
-$rows = $connection->executeQuery($sql, [
-    'query' => '%'.$query.'%',
-])->fetchAllAssociative();</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé (Doctrine ORM QueryBuilder)
+$rows = $this->createQueryBuilder('p')
+    ->select('p.id AS id', 'p.name AS name', 'p.description AS description', 'p.priceCents AS price_cents', 'p.isPublic AS is_public')
+    ->where('p.isPublic = :isPublic')
+    ->andWhere('p.name LIKE :query')
+    ->setParameter('isPublic', true)
+    ->setParameter('query', '%'.$query.'%')
+    ->orderBy('p.name', 'ASC')
+    ->getQuery()
+    ->getArrayResult();
+
+                /** @var list&lt;array{id:int,name:string,description:string,price_cents:int,is_public:bool}&gt; $rows */
+return $rows;</code></pre>
+                <p><strong>Source vulnérable :</strong> <code>owasp-05/src/Repository/ProductRepository.php</code> (méthode <code>findPublicCatalogVulnerable</code>).</p>
+                <p><strong>Point d'appel :</strong> <code>owasp-05/src/Controller/ProductController.php</code> (méthode <code>index</code>).</p>
+                <p><strong>Dépendances :</strong> aucune dépendance Composer ni import PHP à ajouter.</p>
+                <p><strong>Approche :</strong> ORM QueryBuilder (DQL généré par Doctrine), pas SQL brut concaténé.</p>
                 <p class="text-xs">Principe OWASP: une donnée utilisateur doit rester une valeur, jamais une instruction SQL.</p>
             </div>
         </details>
@@ -72,18 +81,28 @@ $rows = $connection->executeQuery($sql, [
         <details class="border rounded border-green-200">
             <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
             <div class="p-3 text-sm text-green-900 space-y-3">
-                <p><strong>Payload local:</strong> <code>" UNION SELECT id, email, "user" FROM app_user -- </code></p>
+                <p><strong>Payload local:</strong> <code>" UNION SELECT id, email, "user" FROM app_user -- -</code></p>
                 <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
 $sql = 'SELECT id, name, "product" AS type
         FROM product
         WHERE name LIKE "%'.$q.'%"';</code></pre>
-                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
-$sql = 'SELECT id, name, "product" AS type
-        FROM product
-        WHERE name LIKE :query';
-$rows = $connection->executeQuery($sql, [
-    'query' => '%'.$query.'%',
-])->fetchAllAssociative();</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé (Doctrine DBAL QueryBuilder)
+$qb = $this->getEntityManager()->getConnection()->createQueryBuilder();
+$qb
+    ->select('id', 'name', '"product" AS type')
+    ->from('product')
+    ->where('name LIKE :query')
+    ->setParameter('query', '%'.$query.'%')
+    ->orderBy('name', 'ASC');
+
+/** @var list&lt;array{id:int,name:string,type:string}&gt; $rows */
+$rows = $qb->executeQuery()->fetchAllAssociative();
+
+return $rows;</code></pre>
+                <p><strong>Source vulnérable :</strong> <code>owasp-05/src/Repository/ProductRepository.php</code> (méthode <code>findInternalSearchVulnerable</code>).</p>
+                <p><strong>Point d'appel :</strong> <code>owasp-05/src/Controller/InternalSearchController.php</code> (méthode <code>index</code>).</p>
+                <p><strong>Dépendances :</strong> aucune dépendance Composer ni import PHP à ajouter.</p>
+                <p><strong>Approche :</strong> DBAL QueryBuilder (SQL construit via Doctrine DBAL), pas SQL brut concaténé.</p>
                 <p class="text-xs">Principe OWASP: une injection peut détourner une recherche et extraire des données d'autres tables.</p>
             </div>
         </details>
@@ -110,10 +129,25 @@ $rows = $connection->executeQuery($sql, [
             <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
             <div class="p-3 text-sm text-green-900 space-y-3">
                 <p><strong>Payload local:</strong> <code>&lt;script&gt;alert("xss-demo")&lt;/script&gt;</code></p>
+                <p><strong>Pourquoi ça exécute du JS :</strong> le commentaire est stocké en base puis réaffiché dans la vue avec <code>|raw</code>, donc Twig n'échappe plus le HTML.</p>
+                <p><strong>Chaîne d'attaque :</strong> formulaire <code>POST /customers/{id}/comments</code> → stockage DB → affichage historique <code>GET /customers/{id}/comments</code> → script exécuté à chaque affichage.</p>
                 <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>{# ❌ Vulnérable #}
 &#123;&#123; comment.content|raw &#125;&#125;</code></pre>
                 <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>{# ✅ Corrigé #}
 &#123;&#123; comment.content &#125;&#125;</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Complément backend (Controller::store)
+$content = mb_substr(trim($request->request->getString('content')), 0, 2000);
+
+// Ne garder qu'un sous-ensemble HTML sûr (ou aucun HTML selon le besoin métier)
+$content = strip_tags($content, '&lt;b&gt;&lt;i&gt;&lt;strong&gt;&lt;em&gt;&lt;br&gt;');
+
+$comment = (new CustomerComment())
+    ->setCustomer($customer)
+    ->setAuthor($currentUser)
+    ->setContent($content);</code></pre>
+                <p><strong>Source vulnérable :</strong> <code>owasp-05/templates/customer_comments/index.html.twig</code> (rendu <code>comment.content|raw</code>).</p>
+                <p><strong>Point d'entrée :</strong> <code>owasp-05/src/Controller/CustomerCommentController.php</code> (méthodes <code>store</code> puis <code>index</code>).</p>
+                <p><strong>Durcissement recommandé :</strong> garder l'auto-escape Twig, apprendre et appliquer aussi un échappement/sanitation côté backend (normalisation ou allowlist HTML avant persistance), puis ajouter une CSP pour réduire l'impact d'une XSS résiduelle.</p>
                 <p class="text-xs">Principe OWASP: une donnée utilisateur ne doit pas devenir du HTML exécutable.</p>
             </div>
         </details>

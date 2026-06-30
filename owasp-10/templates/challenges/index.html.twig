@@ -33,7 +33,11 @@
         <details class="border rounded border-green-200">
             <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
             <div class="p-3 text-sm text-green-900 space-y-3">
-                <p><strong>Exploit local:</strong> compte alice, puis GET <code>/admin/users</code>.</p>
+                <p><strong>Exploit local :</strong> connectez-vous avec <code>alice / alice123</code>, puis ouvrez <code>GET /admin/users</code>.</p>
+                <p><strong>Fichier :</strong> <code>src/Controller/AdminUserController.php</code><br><strong>Fonction :</strong> <code>users()</code></p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code># Résultat observé
+HTTP 200 + affichage de la liste complète des utilisateurs
+alors qu'Alice ne possède pas ROLE_ADMIN.</code></pre>
                 <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
 try {
     $this-&gt;denyAccessUnlessGranted('ROLE_ADMIN');
@@ -41,6 +45,7 @@ try {
     $logger-&gt;warning('Admin access check failed, continuing anyway');
 }
 $users = $userRepository-&gt;findAll();</code></pre>
+                <p><strong>Pourquoi c'est vulnérable :</strong> le bloc <code>catch</code> transforme un refus d'accès en simple warning puis continue le traitement. La protection existe mais son échec est neutralisé.</p>
                 <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
 #[IsGranted('ROLE_ADMIN')]
 public function users(UserRepository $userRepository): Response
@@ -74,7 +79,11 @@ public function users(UserRepository $userRepository): Response
         <details class="border rounded border-green-200">
             <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
             <div class="p-3 text-sm text-green-900 space-y-3">
-                <p><strong>Exploit local:</strong> compte bob, puis GET <code>/finance/export?download=1&amp;simulate_failure=1</code>.</p>
+                <p><strong>Exploit local :</strong> connectez-vous avec <code>bob / bob123</code>, puis ouvrez <code>/finance/export?download=1&amp;simulate_failure=1</code>.</p>
+                <p><strong>Fichier :</strong> <code>src/Controller/ReportExportController.php</code><br><strong>Fonction :</strong> <code>export()</code><br><strong>Service lié :</strong> <code>src/Security/PermissionChecker.php::canExportSensitiveData()</code></p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code># Résultat observé
+Le service de permission lève une exception, mais l'export est quand même généré.
+Un utilisateur non autorisé récupère des données sensibles.</code></pre>
                 <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
 try {
     $canExport = $permissionChecker-&gt;canExportSensitiveData($currentUser);
@@ -82,6 +91,7 @@ try {
     $logger-&gt;warning('Permission check failed, allowing export by fallback');
     $canExport = true;
 }</code></pre>
+                <p><strong>Pourquoi c'est vulnérable :</strong> la valeur de secours <code>$canExport = true</code> crée un mode "open by default". En sécurité, une incertitude doit toujours mener au refus.</p>
                 <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
 try {
     $canExport = $permissionChecker-&gt;canExportSensitiveData($currentUser);
@@ -114,7 +124,12 @@ try {
         <details class="border rounded border-green-200">
             <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
             <div class="p-3 text-sm text-green-900 space-y-3">
-                <p><strong>Exploit local:</strong> POST <code>/orders/1/confirm</code> avec <code>simulate_failure=1</code>.</p>
+                <p><strong>Exploit local :</strong> connectez-vous avec <code>alice / alice123</code>, puis envoyez <code>POST /orders/1/confirm</code> avec <code>simulate_failure=1</code>.</p>
+                <p><strong>Fichier :</strong> <code>src/Controller/OrderController.php</code><br><strong>Fonction :</strong> <code>confirm()</code><br><strong>Service lié :</strong> <code>src/Service/PaymentValidator.php::validatePayment()</code></p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code># Résultat observé
+Réponse API: success=true
+Mais la validation de paiement échoue dans les logs.
+La commande est déjà confirmée et une facture existe: état métier incohérent.</code></pre>
                 <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
 $order-&gt;markAsConfirmed();
 $entityManager-&gt;persist($invoice);
@@ -125,6 +140,7 @@ try {
     $logger-&gt;warning('Payment validation failed, but order is already confirmed');
 }
 return new JsonResponse(['success' =&gt; true]);</code></pre>
+                <p><strong>Pourquoi c'est vulnérable :</strong> le code persiste l'état final avant l'étape critique. En cas d'erreur ultérieure, il n'y a pas de rollback fonctionnel.</p>
                 <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
 try {
     $entityManager-&gt;wrapInTransaction(function () use ($order, $paymentValidator, $entityManager): void {
@@ -160,7 +176,14 @@ try {
         <details class="border rounded border-green-200">
             <summary class="cursor-pointer bg-green-50 px-3 py-2 text-sm font-medium text-green-900">Révéler la solution & correction</summary>
             <div class="p-3 text-sm text-green-900 space-y-3">
-                <p><strong>Exploit local:</strong> GET <code>/reports/3/export</code>.</p>
+                <p><strong>Exploit local :</strong> connectez-vous avec <code>admin / admin123</code> puis ouvrez <code>GET /reports/3/export?simulate_failure=1</code>.</p>
+                <p><strong>Fichier :</strong> <code>src/Controller/ReportGenerationController.php</code><br><strong>Fonction :</strong> <code>export()</code><br><strong>Service lié :</strong> <code>src/Service/ReportFileExporter.php::generate()</code></p>
+                <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code># Résultat observé
+La réponse JSON expose:
+- message d'exception
+- chemin de fichier serveur
+- numéro de ligne
+- stack trace complète</code></pre>
                 <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ❌ Vulnérable
 catch (\Throwable $exception) {
     return new JsonResponse([
@@ -170,6 +193,7 @@ catch (\Throwable $exception) {
         'trace' =&gt; $exception-&gt;getTraceAsString(),
     ], 500);
 }</code></pre>
+                <p><strong>Pourquoi c'est vulnérable :</strong> ces détails accélèrent la reconnaissance attaquant (structure interne, chemins, composants, flux d'exécution).</p>
                 <pre class="bg-slate-900 text-slate-100 p-3 rounded text-xs overflow-x-auto"><code>// ✅ Corrigé
 catch (\Throwable $exception) {
     $logger-&gt;error('Report generation failed', ['exception' =&gt; $exception]);
