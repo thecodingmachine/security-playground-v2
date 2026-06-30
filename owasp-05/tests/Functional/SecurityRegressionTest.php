@@ -17,7 +17,7 @@ final class SecurityRegressionTest extends KernelTestCase
 
         /** @var ProductRepository $productRepository */
         $productRepository = $container->get(ProductRepository::class);
-        $payload = '" OR 1=1 -- ';
+        $payload = '" OR 1=1 -- -';
 
         /** @var list<array{id:int,name:string,description:string,price_cents:int,is_public:int}> $rows */
         $rows = $productRepository->findPublicCatalogSafe($payload);
@@ -37,7 +37,7 @@ final class SecurityRegressionTest extends KernelTestCase
 
         /** @var ProductRepository $productRepository */
         $productRepository = $container->get(ProductRepository::class);
-        $payload = '" UNION SELECT id, email, "user" FROM app_user -- ';
+        $payload = '" UNION SELECT id, email, "user" FROM app_user -- -';
 
         /** @var list<array{id:int,name:string,type:string}> $rows */
         $rows = $productRepository->findInternalSearchSafe($payload);
