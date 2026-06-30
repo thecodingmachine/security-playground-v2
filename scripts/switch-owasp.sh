@@ -39,4 +39,10 @@ else
     sed -i "s|^        # APP_DEBUG: \${DEBUG}|        APP_DEBUG: \${DEBUG}|" "$COMPOSE_FILE"
 fi
 
+case "$OWASP" in
+    02|04|05|08|10)
+        cp "./owasp-${OWASP}/.env.example" "./owasp-${OWASP}/.env"
+        ;;
+esac
+
 echo "Switched docker-compose.yml to owasp-${OWASP}"

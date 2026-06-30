@@ -41,7 +41,6 @@ final class PasswordLabController extends AbstractController
             return $this->errorResponse($request, 'Ce nom utilisateur est déjà utilisé.');
         }
 
-        // ⚠️ VULNÉRABLE — Cryptographic Failure : md5() est rapide, prévisible et inadapté pour stocker un mot de passe.
         $user = (new User())
             ->setUsername($username)
             ->setFullName($fullName)
@@ -61,7 +60,7 @@ final class PasswordLabController extends AbstractController
     }
 
     #[Route('/lab/password-dump', name: 'lab_password_dump', methods: ['GET'])]
-    public function passwordDump(UserRepository $userRepository): Response
+    public function passwordDump(Request $request, UserRepository $userRepository): Response
     {
         $projectDir = $this->getParameter('kernel.project_dir');
         $dictionaryPath = (is_string($projectDir) ? $projectDir : '').'/resources/training/weak-password-dictionary.txt';
@@ -74,9 +73,31 @@ final class PasswordLabController extends AbstractController
             }
         }
 
+        $selectedUserId = $request->query->getInt('user_id');
+        $candidatePassword = trim($request->query->getString('candidate_password'));
+        $comparison = null;
+
+        if ($selectedUserId > 0 && $candidatePassword !== '') {
+            $targetUser = $userRepository->find($selectedUserId);
+
+            if ($targetUser instanceof User) {
+                $candidateHash = md5($candidatePassword);
+                $comparison = [
+                    'user' => $targetUser,
+                    'candidate_password' => $candidatePassword,
+                    'candidate_hash' => $candidateHash,
+                    'stored_hash' => $targetUser->getPassword(),
+                    'match' => hash_equals($targetUser->getPassword(), $candidateHash),
+                ];
+            }
+        }
+
         return $this->render('lab/password_dump.html.twig', [
             'users' => $userRepository->findBy([], ['id' => 'ASC']),
             'dictionary' => $dictionary,
+            'selected_user_id' => $selectedUserId,
+            'candidate_password' => $candidatePassword,
+            'comparison' => $comparison,
         ]);
     }
 
