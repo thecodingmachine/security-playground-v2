@@ -133,7 +133,7 @@
                 </summary>
                 <div class="px-4 py-3 bg-amber-50 border-t border-amber-200 space-y-1.5">
                     <p class="text-sm text-amber-800">• Envoyez des requêtes POST en boucle sur <span class="font-mono bg-amber-100 px-1 rounded">/login</span> en changeant uniquement le champ <span class="font-mono bg-amber-100 px-1 rounded">password</span>.</p>
-                    <p class="text-sm text-amber-800">• Utilisez le challenge 2 pour distinguer "mauvais mot de passe" (compte existant) d'un "compte inexistant".</p>
+                    <p class="text-sm text-amber-800">• Utilisez le challenge 1 pour distinguer "mauvais mot de passe" (compte existant) d'un "compte inexistant".</p>
                     <p class="text-sm text-amber-800">• Testez des mots de passe courants : <span class="font-mono bg-amber-100 px-1 rounded">alice</span>, <span class="font-mono bg-amber-100 px-1 rounded">alice123</span>, <span class="font-mono bg-amber-100 px-1 rounded">password</span>, <span class="font-mono bg-amber-100 px-1 rounded">123456</span>...</p>
                 </div>
             </details>
